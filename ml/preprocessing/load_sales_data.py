@@ -1,11 +1,15 @@
 import pandas as pd
 
-sales_df = pd.read_csv("ml/data/raw/sales/sales_data.csv")
+sales = pd.read_csv("ml/data/raw/sales/sales_data.csv")
 
-print(sales_df.head())
+print("First 5 Rows")
+print(sales.head())
 
-print("\nRows and Columns:")
-print(sales_df.shape)
+print("\nDataset Shape")
+print(sales.shape)
 
-print("\nColumn Names:")
-print(sales_df.columns)
+print("\nColumn Names")
+print(sales.columns)
+
+print("\nDataset Information")
+print(sales.info())
