@@ -1,8 +1,10 @@
+import React from "react";
+
 function Dashboard() {
   return (
-    <div>
-      <h1>AI Business Consultant Dashboard</h1>
-      <p>Welcome to the AI Business Consultant Project</p>
+    <div className="container mt-4">
+      <h2>Business Analytics Dashboard</h2>
+      <p>Welcome to the AI Business Consultant Dashboard.</p>
     </div>
   );
 }
