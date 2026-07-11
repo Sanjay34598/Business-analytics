@@ -17,4 +17,4 @@ AI Business Consultant is a Machine Learning project that helps small businesses
 ## Team
 
 - Sanjay
-- Srija
+- Sreeja
