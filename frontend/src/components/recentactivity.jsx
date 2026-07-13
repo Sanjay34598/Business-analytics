@@ -2,25 +2,41 @@ function RecentActivity(){
 
 return(
 
-<div className="activity">
+<div className="table-section">
 
-<h2>
+<h2>Recent Activity</h2>
 
-Recent Activity
+<table>
 
-</h2>
+<tbody>
 
-<ul>
+<tr>
 
-<li>✔ Sales Forecast Generated</li>
+<td>✔ Dataset Loaded</td>
 
-<li>✔ Customer Segmentation Completed</li>
+</tr>
 
-<li>✔ Recommendation Model Updated</li>
+<tr>
 
-<li>✔ Churn Prediction Completed</li>
+<td>✔ Forecast Model Executed</td>
 
-</ul>
+</tr>
+
+<tr>
+
+<td>✔ Customer Segmentation Completed</td>
+
+</tr>
+
+<tr>
+
+<td>✔ Recommendation Model Generated</td>
+
+</tr>
+
+</tbody>
+
+</table>
 
 </div>
 
