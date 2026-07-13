@@ -1,4 +1,4 @@
-from pathlib import path
+from pathlib import Path
 
 PROJECT_ROOT	= path(__file__).resolve().parents[2]
 
