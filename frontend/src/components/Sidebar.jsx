@@ -1,63 +1,49 @@
-import { NavLink } from "react-router-dom";
+import "../styles/Navbar.css";
 
-import "../styles/Sidebar.css";
+function Navbar() {
 
-function Sidebar(){
+    const today = new Date().toLocaleDateString("en-IN", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+    });
 
-    return(
+    return (
 
-        <div className="sidebar">
+        <nav className="navbar">
 
-            <div className="logo">
+            <div className="navbar-left">
 
-                Business Analytics
+                <h2>Business Analytics Dashboard</h2>
+
+                <p>Business Insights & Analytics</p>
 
             </div>
 
-            <ul>
+            <div className="navbar-right">
 
-                <li>
+                <input
+                    type="text"
+                    placeholder="Search..."
+                />
 
-                    <NavLink to="/">Dashboard</NavLink>
+                <span className="date">
+                    {today}
+                </span>
 
-                </li>
+                <div className="profile">
 
-                <li>
+                    PK
 
-                    <NavLink to="/sales">Sales</NavLink>
+                </div>
 
-                </li>
+            </div>
 
-                <li>
-
-                    <NavLink to="/forecast">Forecast</NavLink>
-
-                </li>
-
-                <li>
-
-                    <NavLink to="/customers">Customers</NavLink>
-
-                </li>
-
-                <li>
-
-                    <NavLink to="/inventory">Inventory</NavLink>
-
-                </li>
-
-                <li>
-
-                    <NavLink to="/reports">Reports</NavLink>
-
-                </li>
-
-            </ul>
-
-        </div>
+        </nav>
 
     );
 
 }
 
-export default Sidebar;
+export default Navbar;
