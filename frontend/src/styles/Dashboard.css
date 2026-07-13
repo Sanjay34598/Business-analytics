@@ -1,79 +1,211 @@
+*{
+
+    box-sizing:border-box;
+
+}
+
 body{
 
-margin:0;
+    margin:0;
 
-font-family:Arial,Helvetica,sans-serif;
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
 
-background:#f5f6fa;
+    background:#f3f4f6;
 
 }
 
 .layout{
 
-display:flex;
+    display:flex;
 
 }
 
 .main{
 
-margin-left:240px;
+    margin-left:250px;
 
-width:100%;
+    width:calc(100% - 250px);
+
+    min-height:100vh;
+
+    background:#f3f4f6;
 
 }
 
 .content{
 
-padding:30px;
+    padding:35px;
 
 }
 
 .cards{
 
-display:grid;
+    display:grid;
 
-grid-template-columns:repeat(4,1fr);
+    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
 
-gap:20px;
+    gap:25px;
 
-margin:30px 0;
+    margin:30px 0;
+
+}
+
+.stat-card{
+
+    background:white;
+
+    padding:25px;
+
+    border-radius:12px;
+
+    box-shadow:0 4px 15px rgba(0,0,0,.08);
+
+    transition:.3s;
+
+}
+
+.stat-card:hover{
+
+    transform:translateY(-5px);
+
+}
+
+.stat-card h4{
+
+    margin:0;
+
+    color:#6b7280;
+
+    font-weight:500;
+
+}
+
+.stat-card h2{
+
+    margin-top:15px;
+
+    color:#2563eb;
+
+    font-size:30px;
 
 }
 
 .table-section{
 
-background:white;
+    background:white;
 
-padding:20px;
+    border-radius:12px;
 
-border-radius:10px;
+    padding:25px;
 
-box-shadow:0 2px 8px rgba(0,0,0,.1);
+    box-shadow:0 4px 15px rgba(0,0,0,.08);
+
+    overflow-x:auto;
+
+}
+
+.table-section h2{
+
+    margin-bottom:20px;
+
+    color:#111827;
 
 }
 
 table{
 
-width:100%;
+    width:100%;
 
-border-collapse:collapse;
+    border-collapse:collapse;
+
+}
+
+thead{
+
+    background:#2563eb;
 
 }
 
 th{
 
-background:#2563eb;
+    color:white;
 
-color:white;
+    padding:15px;
 
-padding:12px;
+    text-align:left;
+
+    font-size:15px;
 
 }
 
 td{
 
-padding:12px;
+    padding:14px;
 
-border-bottom:1px solid #ddd;
+    border-bottom:1px solid #e5e7eb;
+
+    color:#374151;
+
+}
+
+tbody tr:nth-child(even){
+
+    background:#f9fafb;
+
+}
+
+tbody tr:hover{
+
+    background:#dbeafe;
+
+    transition:.3s;
+
+}
+
+h1{
+
+    color:#111827;
+
+}
+
+p{
+
+    color:#6b7280;
+
+}
+
+@media(max-width:900px){
+
+.sidebar{
+
+    width:70px;
+
+}
+
+.logo{
+
+    display:none;
+
+}
+
+.sidebar-footer{
+
+    display:none;
+
+}
+
+.main{
+
+    margin-left:70px;
+
+    width:calc(100% - 70px);
+
+}
+
+.cards{
+
+    grid-template-columns:1fr;
+
+}
 
 }
