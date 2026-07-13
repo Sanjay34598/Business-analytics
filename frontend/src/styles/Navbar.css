@@ -1,0 +1,29 @@
+.navbar{
+
+    height:70px;
+
+    background:white;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:0 40px;
+
+    box-shadow:0px 2px 8px rgba(0,0,0,.1);
+
+}
+
+.navbar input{
+
+    width:250px;
+
+    padding:10px;
+
+    border-radius:8px;
+
+    border:1px solid #ddd;
+
+}
