@@ -1,5 +1,5 @@
 import {
-Bar
+    Bar
 } from "react-chartjs-2";
 
 import {
@@ -12,11 +12,11 @@ LinearScale,
 
 BarElement,
 
-Title,
-
 Tooltip,
 
-Legend
+Legend,
+
+Title
 
 } from "chart.js";
 
@@ -28,39 +28,37 @@ LinearScale,
 
 BarElement,
 
-Title,
-
 Tooltip,
 
-Legend
+Legend,
+
+Title
 
 );
 
 function SalesChart({sales}){
 
-const regionSales={};
+const regions={};
 
 sales.forEach(item=>{
 
-const region=item.Region;
-
-const amount=Number(item.Sales_Amount);
-
-regionSales[region]=(regionSales[region]||0)+amount;
+regions[item.Region]=(regions[item.Region]||0)+Number(item.Sales_Amount);
 
 });
 
 const data={
 
-labels:Object.keys(regionSales),
+labels:Object.keys(regions),
 
 datasets:[
 
 {
 
-label:"Sales",
+label:"Sales by Region",
 
-data:Object.values(regionSales)
+data:Object.values(regions),
+
+backgroundColor:"#2563eb"
 
 }
 
@@ -70,7 +68,9 @@ data:Object.values(regionSales)
 
 return(
 
-<div className="chart-card">
+<div className="table-section">
+
+<h2>Sales by Region</h2>
 
 <Bar data={data}/>
 
