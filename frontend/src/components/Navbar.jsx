@@ -1,22 +1,28 @@
-import React from "react";
 import "../styles/Navbar.css";
 
-function Navbar(){
+function Navbar() {
 
-    return(
+    const today = new Date().toLocaleDateString();
+
+    return (
 
         <div className="navbar">
 
-            <h2>Dashboard</h2>
+            <div>
 
-            <input
-                type="text"
-                placeholder="Search..."
-            />
+                <h2>Business Analytics Dashboard</h2>
+
+            </div>
+
+            <div>
+
+                {today}
+
+            </div>
 
         </div>
 
-    )
+    );
 
 }
 

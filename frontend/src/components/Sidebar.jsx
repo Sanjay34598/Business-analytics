@@ -1,22 +1,56 @@
-import React from "react";
+import { NavLink } from "react-router-dom";
+
 import "../styles/Sidebar.css";
 
-function Sidebar() {
+function Sidebar(){
 
-    return (
+    return(
 
         <div className="sidebar">
 
-            <h2>Business Analytics</h2>
+            <div className="logo">
+
+                Business Analytics
+
+            </div>
 
             <ul>
 
-                <li>Dashboard</li>
-                <li>Sales</li>
-                <li>Forecast</li>
-                <li>Customers</li>
-                <li>Inventory</li>
-                <li>Reports</li>
+                <li>
+
+                    <NavLink to="/">Dashboard</NavLink>
+
+                </li>
+
+                <li>
+
+                    <NavLink to="/sales">Sales</NavLink>
+
+                </li>
+
+                <li>
+
+                    <NavLink to="/forecast">Forecast</NavLink>
+
+                </li>
+
+                <li>
+
+                    <NavLink to="/customers">Customers</NavLink>
+
+                </li>
+
+                <li>
+
+                    <NavLink to="/inventory">Inventory</NavLink>
+
+                </li>
+
+                <li>
+
+                    <NavLink to="/reports">Reports</NavLink>
+
+                </li>
 
             </ul>
 

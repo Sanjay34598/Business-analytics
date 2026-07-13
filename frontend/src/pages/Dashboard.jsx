@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+
 import api from "../services/api";
 
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
+import StatCard from "../components/StatCard";
+import PageHeader from "../components/PageHeader";
 
 import "../styles/Dashboard.css";
 
@@ -13,84 +16,88 @@ function Dashboard() {
     useEffect(() => {
 
         api.get("/sales")
-            .then((response) => {
-                setSales(response.data);
-            })
-            .catch((error) => {
-                console.log(error);
-            });
 
-    }, []);
+        .then((response)=>{
+
+            setSales(response.data);
+
+        });
+
+    },[]);
 
     const totalSales = sales.reduce(
-        (sum, item) => sum + Number(item.Sales_Amount || 0),
+
+        (sum,item)=>sum+Number(item.Sales_Amount||0),
+
         0
+
     );
 
     const totalProfit = sales.reduce(
-        (sum, item) => sum + Number(item.Profit || 0),
+
+        (sum,item)=>sum+Number(item.Profit||0),
+
         0
+
     );
 
-    const totalOrders = sales.length;
+    return(
 
-    return (
+        <div className="layout">
 
-        <div className="dashboard-layout">
+            <Sidebar/>
 
-            <Sidebar />
+            <div className="main">
 
-            <div className="dashboard-content">
+                <Navbar/>
 
-                <Navbar />
+                <div className="content">
 
-                <div className="dashboard">
+                    <PageHeader
 
-                    <h1>Business Analytics Dashboard</h1>
+                        title="Dashboard"
 
-                    <p className="subtitle">
-                        Overview of your business performance
-                    </p>
+                        subtitle="Business Performance Overview"
+
+                    />
 
                     <div className="cards">
 
-                        <div className="card">
+                        <StatCard
 
-                            <h3>Total Sales</h3>
+                            title="Total Sales"
 
-                            <h2>
-                                ₹ {totalSales.toLocaleString(undefined, {
-                                    maximumFractionDigits: 2
-                                })}
-                            </h2>
+                            value={`₹ ${totalSales.toFixed(0)}`}
 
-                        </div>
+                        />
 
-                        <div className="card">
+                        <StatCard
 
-                            <h3>Total Profit</h3>
+                            title="Total Profit"
 
-                            <h2>
-                                ₹ {totalProfit.toLocaleString(undefined, {
-                                    maximumFractionDigits: 2
-                                })}
-                            </h2>
+                            value={`₹ ${totalProfit.toFixed(0)}`}
 
-                        </div>
+                        />
 
-                        <div className="card">
+                        <StatCard
 
-                            <h3>Total Orders</h3>
+                            title="Orders"
 
-                            <h2>{totalOrders}</h2>
+                            value={sales.length}
 
-                        </div>
+                        />
+
+                        <StatCard
+
+                            title="Products"
+
+                            value="1000"
+
+                        />
 
                     </div>
 
-                    <div className="table-container">
-
-                        <h2>Recent Sales</h2>
+                    <div className="table-section">
 
                         <table>
 
@@ -98,10 +105,14 @@ function Dashboard() {
 
                                 <tr>
 
-                                    <th>Product ID</th>
+                                    <th>Product</th>
+
                                     <th>Region</th>
+
                                     <th>Sales Rep</th>
+
                                     <th>Sales</th>
+
                                     <th>Profit</th>
 
                                 </tr>
@@ -110,23 +121,19 @@ function Dashboard() {
 
                             <tbody>
 
-                                {sales.slice(0, 20).map((item, index) => (
+                                {sales.slice(0,10).map((row,index)=>(
 
                                     <tr key={index}>
 
-                                        <td>{item.Product_ID}</td>
+                                        <td>{row.Product_ID}</td>
 
-                                        <td>{item.Region_and_Sales_Rep}</td>
+                                        <td>{row.Region}</td>
 
-                                        <td>{item.Sales_Rep}</td>
+                                        <td>{row.Sales_Rep}</td>
 
-                                        <td>
-                                            ₹ {Number(item.Sales_Amount).toFixed(2)}
-                                        </td>
+                                        <td>{row.Sales_Amount}</td>
 
-                                        <td>
-                                            ₹ {Number(item.Profit).toFixed(2)}
-                                        </td>
+                                        <td>{row.Profit}</td>
 
                                     </tr>
 
