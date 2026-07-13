@@ -1,0 +1,46 @@
+.sidebar{
+
+    width:240px;
+    height:100vh;
+
+    background:#1f2937;
+
+    color:white;
+
+    position:fixed;
+
+    left:0;
+    top:0;
+
+}
+
+.sidebar h2{
+
+    text-align:center;
+    padding:25px 0;
+
+    border-bottom:1px solid #374151;
+
+}
+
+.sidebar ul{
+
+    list-style:none;
+    padding:0;
+    margin-top:30px;
+
+}
+
+.sidebar li{
+
+    padding:18px 30px;
+
+    cursor:pointer;
+
+}
+
+.sidebar li:hover{
+
+    background:#2563eb;
+
+}
