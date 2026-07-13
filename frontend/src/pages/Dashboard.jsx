@@ -6,6 +6,10 @@ import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import StatCard from "../components/StatCard";
 import PageHeader from "../components/PageHeader";
+import SalesChart from "../components/SalesChart";
+import ForecastChart from "../components/ForecastChart";
+import RecentActivity from "../components/RecentActivity";
+import Footer from "../components/Footer";
 
 import "../styles/Dashboard.css";
 
@@ -16,88 +20,81 @@ function Dashboard() {
     useEffect(() => {
 
         api.get("/sales")
+            .then((response) => {
+                setSales(response.data);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
 
-        .then((response)=>{
-
-            setSales(response.data);
-
-        });
-
-    },[]);
+    }, []);
 
     const totalSales = sales.reduce(
-
-        (sum,item)=>sum+Number(item.Sales_Amount||0),
-
+        (sum, item) => sum + Number(item.Sales_Amount || 0),
         0
-
     );
 
     const totalProfit = sales.reduce(
-
-        (sum,item)=>sum+Number(item.Profit||0),
-
+        (sum, item) => sum + Number(item.Profit || 0),
         0
-
     );
 
-    return(
+    const totalOrders = sales.length;
+
+    const totalCustomers = new Set(
+        sales.map(item => item.Customer_ID || item.Product_ID)
+    ).size;
+
+    return (
 
         <div className="layout">
 
-            <Sidebar/>
+            <Sidebar />
 
             <div className="main">
 
-                <Navbar/>
+                <Navbar />
 
                 <div className="content">
 
                     <PageHeader
-
                         title="Dashboard"
-
                         subtitle="Business Performance Overview"
-
                     />
 
                     <div className="cards">
 
                         <StatCard
-
                             title="Total Sales"
-
-                            value={`₹ ${totalSales.toFixed(0)}`}
-
+                            value={`₹ ${totalSales.toLocaleString()}`}
                         />
 
                         <StatCard
-
                             title="Total Profit"
-
-                            value={`₹ ${totalProfit.toFixed(0)}`}
-
+                            value={`₹ ${totalProfit.toLocaleString()}`}
                         />
 
                         <StatCard
-
                             title="Orders"
-
-                            value={sales.length}
-
+                            value={totalOrders}
                         />
 
                         <StatCard
-
-                            title="Products"
-
-                            value="1000"
-
+                            title="Customers"
+                            value={totalCustomers}
                         />
 
                     </div>
 
+                    <SalesChart sales={sales} />
+
+                    <ForecastChart />
+
+                    <RecentActivity />
+
                     <div className="table-section">
+
+                        <h2>Recent Sales</h2>
 
                         <table>
 
@@ -105,14 +102,11 @@ function Dashboard() {
 
                                 <tr>
 
-                                    <th>Product</th>
-
+                                    <th>Product ID</th>
                                     <th>Region</th>
-
                                     <th>Sales Rep</th>
-
+                                    <th>Category</th>
                                     <th>Sales</th>
-
                                     <th>Profit</th>
 
                                 </tr>
@@ -121,7 +115,7 @@ function Dashboard() {
 
                             <tbody>
 
-                                {sales.slice(0,10).map((row,index)=>(
+                                {sales.slice(0, 15).map((row, index) => (
 
                                     <tr key={index}>
 
@@ -131,9 +125,15 @@ function Dashboard() {
 
                                         <td>{row.Sales_Rep}</td>
 
-                                        <td>{row.Sales_Amount}</td>
+                                        <td>{row.Product_Category}</td>
 
-                                        <td>{row.Profit}</td>
+                                        <td>
+                                            ₹ {Number(row.Sales_Amount).toFixed(2)}
+                                        </td>
+
+                                        <td>
+                                            ₹ {Number(row.Profit || 0).toFixed(2)}
+                                        </td>
 
                                     </tr>
 
@@ -144,6 +144,8 @@ function Dashboard() {
                         </table>
 
                     </div>
+
+                    <Footer />
 
                 </div>
 
