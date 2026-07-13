@@ -207,5 +207,17 @@ p{
     grid-template-columns:1fr;
 
 }
+.chart-card{
 
+    background:white;
+
+    padding:25px;
+
+    border-radius:12px;
+
+    margin-top:30px;
+
+    box-shadow:0 4px 15px rgba(0,0,0,.08);
+
+}
 }

@@ -86,7 +86,11 @@ function Dashboard() {
 
                     </div>
 
-                    <SalesChart sales={sales} />
+                    <div className="chart-card">
+
+                         <SalesChart sales={sales} />
+
+                     </div>
 
                     <ForecastChart />
 

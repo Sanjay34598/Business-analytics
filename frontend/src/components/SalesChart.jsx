@@ -1,82 +1,132 @@
+import React from "react";
+
 import {
     Bar
 } from "react-chartjs-2";
 
 import {
-
-Chart as ChartJS,
-
-CategoryScale,
-
-LinearScale,
-
-BarElement,
-
-Tooltip,
-
-Legend,
-
-Title
-
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
 } from "chart.js";
 
 ChartJS.register(
-
-CategoryScale,
-
-LinearScale,
-
-BarElement,
-
-Tooltip,
-
-Legend,
-
-Title
-
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
 );
 
-function SalesChart({sales}){
+function SalesChart({ sales }) {
 
-const regions={};
+    if (!sales || sales.length === 0) {
 
-sales.forEach(item=>{
+        return (
+            <div className="table-section">
 
-regions[item.Region]=(regions[item.Region]||0)+Number(item.Sales_Amount);
+                <h2>Sales by Region</h2>
 
-});
+                <p>No sales data available.</p>
 
-const data={
+            </div>
+        );
 
-labels:Object.keys(regions),
+    }
 
-datasets:[
+    const regionSales = {};
 
-{
+    sales.forEach((item) => {
 
-label:"Sales by Region",
+        const region = item.Region || "Unknown";
 
-data:Object.values(regions),
+        const amount = Number(item.Sales_Amount || 0);
 
-backgroundColor:"#2563eb"
+        if (!regionSales[region]) {
 
-}
+            regionSales[region] = 0;
 
-]
+        }
 
-};
+        regionSales[region] += amount;
 
-return(
+    });
 
-<div className="table-section">
+    const data = {
 
-<h2>Sales by Region</h2>
+        labels: Object.keys(regionSales),
 
-<Bar data={data}/>
+        datasets: [
 
-</div>
+            {
 
-);
+                label: "Sales Amount",
+
+                data: Object.values(regionSales),
+
+                backgroundColor: [
+
+                    "#2563EB",
+                    "#16A34A",
+                    "#F59E0B",
+                    "#DC2626",
+                    "#8B5CF6",
+                    "#06B6D4"
+
+                ],
+
+                borderRadius: 8
+
+            }
+
+        ]
+
+    };
+
+    const options = {
+
+        responsive: true,
+
+        plugins: {
+
+            legend: {
+
+                position: "top"
+
+            },
+
+            title: {
+
+                display: true,
+
+                text: "Sales by Region"
+
+            }
+
+        }
+
+    };
+
+    return (
+
+        <div className="table-section">
+
+            <Bar
+
+                data={data}
+
+                options={options}
+
+            />
+
+        </div>
+
+    );
 
 }
 
