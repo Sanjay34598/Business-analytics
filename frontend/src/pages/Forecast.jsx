@@ -1,12 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FiActivity, FiTarget, FiTrendingUp, FiDownload } from "react-icons/fi";
 import * as XLSX from "xlsx";
-import Footer from "../components/Footer";
+import Layout from "../components/Layout";
 import ForecastChart from "../components/ForecastChart";
 import Loader from "../components/Loader";
-import Navbar from "../components/Navbar";
 import PageHeader from "../components/PageHeader";
-import Sidebar from "../components/Sidebar";
 import StatCard from "../components/StatCard";
 import { getForecast } from "../services/salesapi";
 import "../styles/Dashboard.css";
@@ -71,11 +69,8 @@ function Forecast() {
   }, [forecast, horizon]);
 
   return (
-    <div className="layout">
-      <Sidebar />
-      <main className="main">
-        <Navbar />
-        <div className="content">
+    <Layout>
+      <div className="content">
           <PageHeader 
             title="Sales Forecast" 
             subtitle="Review the available regression model results against actual sales values."
@@ -183,10 +178,8 @@ function Forecast() {
               </section>
             </>
           )}
-          <Footer />
         </div>
-      </main>
-    </div>
+    </Layout>
   );
 }
 

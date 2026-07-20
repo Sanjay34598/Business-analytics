@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { FiDatabase, FiUploadCloud, FiTrash2, FiDownload, FiRefreshCw, FiClock, FiFile } from "react-icons/fi";
-import Sidebar from "../components/Sidebar";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import Layout from "../components/Layout";
 import PageHeader from "../components/PageHeader";
 import StatCard from "../components/StatCard";
 import "../styles/Dashboard.css";
@@ -29,11 +27,8 @@ function Datasets() {
   ];
 
   return (
-    <div className="layout">
-      <Sidebar />
-      <main className="main">
-        <Navbar />
-        <div className="content">
+    <Layout>
+      <div className="content">
           <PageHeader 
             title="Dataset Management" 
             subtitle="View and manage the core data driving your analytics and machine learning models."
@@ -160,11 +155,8 @@ function Datasets() {
               </div>
             </div>
           )}
-
-          <Footer />
         </div>
-      </main>
-    </div>
+    </Layout>
   );
 }
 

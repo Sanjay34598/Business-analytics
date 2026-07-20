@@ -2,11 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Doughnut } from "react-chartjs-2";
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
 import { FiAlertTriangle, FiCheckCircle, FiUsers } from "react-icons/fi";
-import Footer from "../components/Footer";
+import Layout from "../components/Layout";
 import Loader from "../components/Loader";
-import Navbar from "../components/Navbar";
 import PageHeader from "../components/PageHeader";
-import Sidebar from "../components/Sidebar";
 import StatCard from "../components/StatCard";
 import { getChurn, getSales } from "../services/salesapi";
 import "../styles/Dashboard.css";
@@ -59,11 +57,8 @@ function Customers() {
   };
 
   return (
-    <div className="layout">
-      <Sidebar />
-      <main className="main">
-        <Navbar />
-        <div className="content">
+    <Layout>
+      <div className="content">
           <PageHeader 
             title="Customer Insights" 
             subtitle="Customer-type distribution and churn model classifications from existing analytical datasets." 
@@ -204,10 +199,8 @@ function Customers() {
               </section>
             </>
           )}
-          <Footer />
         </div>
-      </main>
-    </div>
+    </Layout>
   );
 }
 

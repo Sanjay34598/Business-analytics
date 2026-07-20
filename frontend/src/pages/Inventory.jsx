@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FiBox, FiLayers, FiTrendingUp } from "react-icons/fi";
-import Footer from "../components/Footer";
+import Layout from "../components/Layout";
 import Loader from "../components/Loader";
-import Navbar from "../components/Navbar";
 import PageHeader from "../components/PageHeader";
-import Sidebar from "../components/Sidebar";
 import StatCard from "../components/StatCard";
 import { getRecommendations } from "../services/salesapi";
 import "../styles/Dashboard.css";
@@ -40,11 +38,8 @@ function Inventory() {
   }), [recommendations]);
 
   return (
-    <div className="layout">
-      <Sidebar />
-      <main className="main">
-        <Navbar />
-        <div className="content">
+    <Layout>
+      <div className="content">
           <PageHeader 
             title="Product Recommendations" 
             subtitle="Use product-category model output to inform inventory and assortment planning." 
@@ -131,10 +126,8 @@ function Inventory() {
               <p className="data-note">Stock-on-hand data is not exposed by the current API. This page therefore presents the available recommendation results rather than inventory quantities.</p>
             </>
           )}
-          <Footer />
         </div>
-      </main>
-    </div>
+    </Layout>
   );
 }
 
