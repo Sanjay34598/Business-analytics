@@ -1,16 +1,22 @@
 .navbar {
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 40;
   min-height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 var(--space-xl);
   border-bottom: 1px solid var(--color-border);
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
 }
 
 .navbar-context {
@@ -34,16 +40,78 @@
   letter-spacing: -0.01em;
 }
 
+.navbar-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.global-search {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  align-items: center;
+}
+
+.global-search .search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--color-text-muted);
+  width: 16px;
+  height: 16px;
+}
+
+.global-search input {
+  width: 100%;
+  height: 36px;
+  padding: 0 40px 0 36px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  font-size: 13px;
+  transition: all var(--duration-fast) var(--ease-out);
+  outline: none;
+}
+
+.global-search input:focus {
+  background: var(--color-surface);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-muted);
+}
+
+.global-search .search-shortcut {
+  position: absolute;
+  right: 8px;
+  padding: 2px 6px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  pointer-events: none;
+}
+
 .navbar-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: var(--space-md);
+  flex: 1;
 }
 
 .reporting-date {
   color: var(--color-text-secondary);
   font-size: 12px;
   font-weight: 500;
+}
+
+.new-analysis-btn {
+  min-height: 32px !important;
+  padding: 0 var(--space-md) !important;
+  font-size: 12px !important;
 }
 
 .icon-button {
@@ -66,19 +134,19 @@
 }
 
 .icon-button svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
 }
 
 .notification-indicator {
   position: absolute;
-  top: 9px;
-  right: 9px;
-  width: 6px;
-  height: 6px;
-  border: 1px solid var(--color-surface);
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--color-surface);
   border-radius: var(--radius-full);
-  background: var(--color-warning);
+  background: var(--color-danger);
 }
 
 .profile-button {
@@ -100,13 +168,13 @@
 
 .profile-button span {
   display: grid;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   place-items: center;
   border-radius: var(--radius-full);
   background: var(--color-primary-light);
   color: var(--color-primary-dark);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -115,12 +183,93 @@
   color: var(--color-text-secondary);
 }
 
+/* Notification Dropdown Specifics */
+.notification-menu {
+  width: 320px;
+}
+
+.notification-actions button {
+  background: transparent;
+  border: none;
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: var(--space-sm);
+}
+
+.notification-actions button:hover {
+  text-decoration: underline;
+}
+
+.notification-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  display: flex;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border-bottom: 1px solid var(--color-border-light);
+  align-items: flex-start;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item.unread {
+  background: var(--color-surface-alt);
+}
+
+.notification-icon {
+  color: var(--color-success);
+  margin-top: 2px;
+}
+
+.notification-content p {
+  font-size: 12px;
+  color: var(--color-text);
+  margin-bottom: 2px;
+  line-height: 1.4;
+}
+
+.notification-content span {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.notification-empty {
+  padding: var(--space-xl);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.text-danger {
+  color: var(--color-danger) !important;
+}
+
+.text-danger:hover {
+  background: var(--color-danger-bg) !important;
+}
+
+@media (max-width: 960px) {
+  .navbar-center {
+    display: none;
+  }
+}
+
 @media (max-width: 620px) {
   .navbar {
     min-height: 56px;
     padding: 0 var(--space-md);
   }
   .reporting-date, .profile-button svg {
+    display: none;
+  }
+  .new-analysis-btn span {
     display: none;
   }
 }

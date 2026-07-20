@@ -1,14 +1,19 @@
 import { NavLink } from "react-router-dom";
-import { FiBarChart2, FiBox, FiFileText, FiGrid, FiTrendingUp, FiUsers } from "react-icons/fi";
+import { FiBarChart2, FiBox, FiFileText, FiGrid, FiTrendingUp, FiUsers, FiDatabase, FiSettings } from "react-icons/fi";
 import "../styles/Sidebar.css";
 
 const navigation = [
-  { label: "Overview", to: "/", icon: FiGrid, end: true },
+  { label: "Dashboard", to: "/", icon: FiGrid, end: true },
+  { label: "Datasets", to: "/datasets", icon: FiDatabase },
   { label: "Sales", to: "/sales", icon: FiTrendingUp },
   { label: "Forecast", to: "/forecast", icon: FiBarChart2 },
   { label: "Customers", to: "/customers", icon: FiUsers },
   { label: "Recommendations", to: "/inventory", icon: FiBox },
   { label: "Reports", to: "/reports", icon: FiFileText },
+];
+
+const bottomNavigation = [
+  { label: "Settings", to: "/settings", icon: FiSettings },
 ];
 
 function Sidebar() {
@@ -30,6 +35,16 @@ function Sidebar() {
               <span>{label}</span>
             </NavLink>
           ))}
+          
+          <div style={{ marginTop: 'var(--space-2xl)' }}>
+            <p className="nav-label">System</p>
+            {bottomNavigation.map(({ label, to, icon: Icon, end }) => (
+              <NavLink key={to} to={to} end={end} className="nav-link">
+                <Icon aria-hidden="true" />
+                <span>{label}</span>
+              </NavLink>
+            ))}
+          </div>
         </nav>
       </div>
       <div className="sidebar-footer">

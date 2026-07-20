@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FiActivity, FiTarget, FiTrendingUp } from "react-icons/fi";
+import { FiActivity, FiTarget, FiTrendingUp, FiDownload } from "react-icons/fi";
+import * as XLSX from "xlsx";
 import Footer from "../components/Footer";
 import ForecastChart from "../components/ForecastChart";
 import Loader from "../components/Loader";
@@ -12,8 +13,24 @@ import "../styles/Dashboard.css";
 
 const currency = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
 
+const exportToExcel = (records) => {
+  const data = records.map((row) => ({
+    "Region": `Region ${Number(row.Region) + 1}`,
+    "Category": `Category ${Number(row.Product_Category) + 1}`,
+    "Month": row.Month,
+    "Actual Sales": Number(row.Actual_Sales),
+    "Predicted Sales": Number(row.Predicted_Sales),
+    "Variance": Number(row.Predicted_Sales) - Number(row.Actual_Sales)
+  }));
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Forecast Output");
+  XLSX.writeFile(workbook, "forecast-export.xlsx");
+};
+
 function Forecast() {
   const [forecast, setForecast] = useState([]);
+  const [horizon, setHorizon] = useState("30");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -47,6 +64,12 @@ function Forecast() {
     };
   }, [forecast]);
 
+  // Adjust data length based on horizon to simulate zooming out
+  const displayData = useMemo(() => {
+    const limit = Number(horizon);
+    return forecast.slice(0, limit);
+  }, [forecast, horizon]);
+
   return (
     <div className="layout">
       <Sidebar />
@@ -55,7 +78,17 @@ function Forecast() {
         <div className="content">
           <PageHeader 
             title="Sales Forecast" 
-            subtitle="Review the available regression model results against actual sales values." 
+            subtitle="Review the available regression model results against actual sales values."
+            actions={
+              <button 
+                type="button"
+                className="primary-button" 
+                onClick={() => exportToExcel(forecast)} 
+                disabled={!forecast.length}
+              >
+                <FiDownload /> Download Output
+              </button>
+            } 
           />
           {loading ? (
             <Loader label="Loading forecast results..." />
@@ -67,6 +100,17 @@ function Forecast() {
             </div>
           ) : (
             <>
+              <div className="filter-panel" style={{ marginBottom: 'var(--space-lg)', padding: '12px var(--space-md)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '12px', flexDirection: 'row' }}>
+                  <span style={{ marginTop: '0' }}>Forecast Horizon</span>
+                  <select value={horizon} onChange={(e) => setHorizon(e.target.value)} style={{ width: 'auto', minWidth: '150px' }}>
+                    <option value="30">30 Days</option>
+                    <option value="60">60 Days</option>
+                    <option value="90">90 Days</option>
+                  </select>
+                </label>
+              </div>
+
               <div className="cards cards--three">
                 <StatCard 
                   title="Forecast Accuracy" 
@@ -91,7 +135,7 @@ function Forecast() {
                 />
               </div>
 
-              <ForecastChart forecast={forecast} title="Actual versus Predicted Sales" />
+              <ForecastChart forecast={displayData} title="Actual versus Predicted Sales" />
 
               <section className="table-panel">
                 <div className="panel-heading">

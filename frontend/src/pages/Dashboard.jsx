@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Doughnut } from "react-chartjs-2";
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
-import { FiActivity, FiBox, FiDollarSign, FiPercent, FiShoppingBag, FiTrendingUp } from "react-icons/fi";
+import { FiActivity, FiBox, FiDollarSign, FiPercent, FiShoppingBag, FiTrendingUp, FiDatabase, FiClock, FiCheckCircle } from "react-icons/fi";
 import Footer from "../components/Footer";
 import ForecastChart from "../components/ForecastChart";
 import Loader from "../components/Loader";
@@ -103,6 +103,39 @@ function Dashboard() {
             </div>
           ) : (
             <>
+              {/* Dataset Metadata Header */}
+              <div style={{ display: 'flex', gap: '24px', padding: '16px 24px', background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', marginBottom: 'var(--space-lg)' }}>
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-md)', background: 'var(--color-primary-light)', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <FiDatabase size={20} />
+                  </div>
+                  <div>
+                    <span style={{ display: 'block', fontSize: '11px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Active Dataset</span>
+                    <strong style={{ fontSize: '15px' }}>Q3_Sales_Master.csv</strong>
+                  </div>
+                </div>
+                <div style={{ width: '1px', background: 'var(--color-border)' }} />
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-md)', background: 'var(--color-surface-alt)', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--color-border)' }}>
+                    <FiCheckCircle size={18} />
+                  </div>
+                  <div>
+                    <span style={{ display: 'block', fontSize: '11px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Model Status</span>
+                    <strong style={{ fontSize: '15px', color: 'var(--color-success)' }}>Models Synced</strong>
+                  </div>
+                </div>
+                <div style={{ width: '1px', background: 'var(--color-border)' }} />
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-md)', background: 'var(--color-surface-alt)', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--color-border)' }}>
+                    <FiClock size={18} />
+                  </div>
+                  <div>
+                    <span style={{ display: 'block', fontSize: '11px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Last Analysis</span>
+                    <strong style={{ fontSize: '15px' }}>Today, 09:45 AM</strong>
+                  </div>
+                </div>
+              </div>
+
               <div className="cards">
                 <StatCard 
                   title="Total Sales" 

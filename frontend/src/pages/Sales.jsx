@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FiDownload, FiSearch } from "react-icons/fi";
+import { FiDownload, FiSearch, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import * as XLSX from "xlsx";
 import Footer from "../components/Footer";
 import Loader from "../components/Loader";
 import Navbar from "../components/Navbar";
@@ -11,12 +12,13 @@ import "../styles/Dashboard.css";
 
 const currency = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
 
-const downloadCsv = (records) => {
-  const headers = ["Sale Date", "Product ID", "Region", "Channel", "Sales Amount", "Profit"];
+const exportToCsv = (records) => {
+  const headers = ["Sale Date", "Product ID", "Region", "Sales Rep", "Channel", "Sales Amount", "Profit"];
   const lines = records.map((row) => [
     row.Sale_Date,
     row.Product_ID,
     `Region ${Number(row.Region) + 1}`,
+    `Rep ${Number(row.Sales_Rep) + 1}`,
     Number(row.Sales_Channel) === 0 ? "Online" : "Retail",
     row.Sales_Amount,
     row.Profit
@@ -28,11 +30,31 @@ const downloadCsv = (records) => {
   URL.revokeObjectURL(link.href);
 };
 
+const exportToExcel = (records) => {
+  const data = records.map((row) => ({
+    "Sale Date": row.Sale_Date,
+    "Product ID": row.Product_ID,
+    "Region": `Region ${Number(row.Region) + 1}`,
+    "Sales Rep": `Rep ${Number(row.Sales_Rep) + 1}`,
+    "Channel": Number(row.Sales_Channel) === 0 ? "Online" : "Retail",
+    "Sales Amount": Number(row.Sales_Amount),
+    "Profit": Number(row.Profit)
+  }));
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Sales Data");
+  XLSX.writeFile(workbook, "sales-export.xlsx");
+};
+
 function Sales() {
   const [sales, setSales] = useState([]);
   const [search, setSearch] = useState("");
   const [region, setRegion] = useState("all");
   const [channel, setChannel] = useState("all");
+  const [rep, setRep] = useState("all");
+  const [dateRange, setDateRange] = useState("all");
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 15;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -52,18 +74,40 @@ function Sales() {
     loadSales();
   }, [loadSales]);
 
-  const filtered = useMemo(() => 
-    sales.filter((item) => {
+  // Handle pagination reset on filter change
+  useEffect(() => {
+    setPage(1);
+  }, [search, region, channel, rep, dateRange]);
+
+  const filtered = useMemo(() => {
+    const today = new Date();
+    return sales.filter((item) => {
       const query = search.toLowerCase();
       const matchesSearch = !query 
-        || String(item.Product_ID).includes(query) 
+        || String(item.Product_ID).toLowerCase().includes(query) 
         || String(item.Sale_Date).toLowerCase().includes(query);
+      
+      const itemDate = new Date(item.Sale_Date);
+      let matchesDate = true;
+      if (dateRange === "7days") {
+        const diff = (today - itemDate) / (1000 * 60 * 60 * 24);
+        matchesDate = diff <= 7;
+      } else if (dateRange === "30days") {
+        const diff = (today - itemDate) / (1000 * 60 * 60 * 24);
+        matchesDate = diff <= 30;
+      }
+
       return matchesSearch 
+        && matchesDate
         && (region === "all" || String(item.Region) === region) 
-        && (channel === "all" || String(item.Sales_Channel) === channel);
-    }), [sales, search, region, channel]);
+        && (channel === "all" || String(item.Sales_Channel) === channel)
+        && (rep === "all" || String(item.Sales_Rep) === rep);
+    });
+  }, [sales, search, region, channel, rep, dateRange]);
 
   const total = filtered.reduce((sum, item) => sum + Number(item.Sales_Amount || 0), 0);
+  const totalPages = Math.ceil(filtered.length / rowsPerPage);
+  const currentData = filtered.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
   return (
     <div className="layout">
@@ -75,14 +119,24 @@ function Sales() {
             title="Sales Performance" 
             subtitle="Explore the sales records currently available to the analytics service." 
             actions={
-              <button 
-                type="button"
-                className="primary-button" 
-                onClick={() => downloadCsv(filtered)} 
-                disabled={!filtered.length}
-              >
-                <FiDownload /> Export CSV
-              </button>
+              <>
+                <button 
+                  type="button"
+                  className="secondary-button" 
+                  onClick={() => exportToCsv(filtered)} 
+                  disabled={!filtered.length}
+                >
+                  <FiDownload /> CSV
+                </button>
+                <button 
+                  type="button"
+                  className="primary-button" 
+                  onClick={() => exportToExcel(filtered)} 
+                  disabled={!filtered.length}
+                >
+                  <FiDownload /> Excel
+                </button>
+              </>
             } 
           />
           {loading ? (
@@ -95,8 +149,8 @@ function Sales() {
             </div>
           ) : (
             <>
-              <section className="filter-panel">
-                <label className="search-field">
+              <section className="filter-panel" style={{ flexWrap: 'wrap' }}>
+                <label className="search-field" style={{ minWidth: '260px' }}>
                   <FiSearch />
                   <input 
                     value={search} 
@@ -106,8 +160,16 @@ function Sales() {
                   />
                 </label>
                 <label>
+                  Date Range
+                  <select value={dateRange} onChange={(e) => setDateRange(e.target.value)}>
+                    <option value="all">All time</option>
+                    <option value="30days">Last 30 days</option>
+                    <option value="7days">Last 7 days</option>
+                  </select>
+                </label>
+                <label>
                   Region
-                  <select value={region} onChange={(event) => setRegion(event.target.value)}>
+                  <select value={region} onChange={(e) => setRegion(e.target.value)}>
                     <option value="all">All regions</option>
                     {[0, 1, 2, 3].map((value) => (
                       <option value={value} key={value}>Region {value + 1}</option>
@@ -116,30 +178,39 @@ function Sales() {
                 </label>
                 <label>
                   Channel
-                  <select value={channel} onChange={(event) => setChannel(event.target.value)}>
+                  <select value={channel} onChange={(e) => setChannel(e.target.value)}>
                     <option value="all">All channels</option>
                     <option value="0">Online</option>
                     <option value="1">Retail</option>
                   </select>
                 </label>
-                <div className="filter-summary">
+                <label>
+                  Sales Rep
+                  <select value={rep} onChange={(e) => setRep(e.target.value)}>
+                    <option value="all">All Reps</option>
+                    {[0, 1, 2, 3, 4, 5, 6].map((value) => (
+                      <option value={value} key={value}>Rep {value + 1}</option>
+                    ))}
+                  </select>
+                </label>
+                <div className="filter-summary" style={{ marginLeft: 'auto', paddingRight: '8px' }}>
                   <strong>₹ {currency.format(total)}</strong>
-                  <span>{filtered.length} matching records</span>
+                  <span>{filtered.length.toLocaleString()} matching records</span>
                 </div>
               </section>
 
               <SalesChart sales={filtered} variant="region" title="Sales by Region" />
 
-              <section className="table-panel">
+              <section className="table-panel" style={{ paddingBottom: 0 }}>
                 <div className="panel-heading">
                   <div>
                     <h2>Sales Records</h2>
-                    <p>Filtered rows can be exported as CSV.</p>
+                    <p>Filtered rows can be exported as CSV or Excel.</p>
                   </div>
-                  <span className="record-count">{filtered.length} rows</span>
+                  <span className="record-count">Page {page} of {totalPages || 1}</span>
                 </div>
                 <div className="table-scroll">
-                  {filtered.length ? (
+                  {currentData.length ? (
                     <table>
                       <thead>
                         <tr>
@@ -153,7 +224,7 @@ function Sales() {
                         </tr>
                       </thead>
                       <tbody>
-                        {filtered.map((row, index) => (
+                        {currentData.map((row, index) => (
                           <tr key={`${row.Product_ID}-${index}`}>
                             <td>{new Date(row.Sale_Date).toLocaleDateString("en-IN")}</td>
                             <td>#{row.Product_ID}</td>
@@ -172,6 +243,30 @@ function Sales() {
                     <p className="empty-state">No sales records match the selected filters.</p>
                   )}
                 </div>
+                
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', borderTop: '1px solid var(--color-border)', gap: '16px' }}>
+                    <button 
+                      className="secondary-button" 
+                      disabled={page === 1}
+                      onClick={() => setPage(p => p - 1)}
+                    >
+                      <FiChevronLeft /> Previous
+                    </button>
+                    <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)', fontWeight: 600 }}>
+                      {page} / {totalPages}
+                    </span>
+                    <button 
+                      className="secondary-button" 
+                      disabled={page === totalPages}
+                      onClick={() => setPage(p => p + 1)}
+                      style={{ flexDirection: 'row-reverse' }}
+                    >
+                      <FiChevronRight /> Next
+                    </button>
+                  </div>
+                )}
               </section>
             </>
           )}
