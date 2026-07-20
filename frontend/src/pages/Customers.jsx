@@ -7,7 +7,7 @@ import Loader from "../components/Loader";
 import Navbar from "../components/Navbar";
 import PageHeader from "../components/PageHeader";
 import Sidebar from "../components/Sidebar";
-import StatCard from "../components/statcard";
+import StatCard from "../components/StatCard";
 import { getChurn, getSales } from "../services/salesapi";
 import "../styles/Dashboard.css";
 

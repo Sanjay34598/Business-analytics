@@ -4,7 +4,7 @@ import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import PageHeader from "../components/PageHeader";
-import StatCard from "../components/statcard";
+import StatCard from "../components/StatCard";
 import "../styles/Dashboard.css";
 
 function Datasets() {

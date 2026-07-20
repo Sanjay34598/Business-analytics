@@ -7,7 +7,7 @@ import Navbar from "../components/Navbar";
 import PageHeader from "../components/PageHeader";
 import SalesChart from "../components/SalesChart";
 import Sidebar from "../components/Sidebar";
-import StatCard from "../components/statcard";
+import StatCard from "../components/StatCard";
 import { getForecast, getRecommendations, getSales } from "../services/salesapi";
 import "../styles/Dashboard.css";
 

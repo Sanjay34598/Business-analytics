@@ -5,9 +5,9 @@ import { FiActivity, FiBox, FiDollarSign, FiPercent, FiShoppingBag, FiTrendingUp
 import ForecastChart from "../components/ForecastChart";
 import Loader from "../components/Loader";
 import PageHeader from "../components/PageHeader";
-import RecentActivity from "../components/recentactivity";
+import RecentActivity from "../components/RecentActivity";
 import SalesChart from "../components/SalesChart";
-import StatCard from "../components/statcard";
+import StatCard from "../components/StatCard";
 import { getForecast, getSales } from "../services/salesapi";
 import "../styles/Dashboard.css";
 import Layout from "../components/Layout";
