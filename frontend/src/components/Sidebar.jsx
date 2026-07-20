@@ -16,19 +16,26 @@ function Sidebar() {
     <aside className="sidebar" aria-label="Primary navigation">
       <div>
         <div className="brand">
-          <span className="brand-mark">BA</span>
-          <div><strong>Business Analytics</strong><span>Decision workspace</span></div>
+          <span className="brand-mark" aria-hidden="true">BA</span>
+          <div className="brand-info">
+            <strong>Business Analytics</strong>
+            <span>Decision workspace</span>
+          </div>
         </div>
         <nav className="sidebar-nav">
           <p className="nav-label">Workspace</p>
           {navigation.map(({ label, to, icon: Icon, end }) => (
             <NavLink key={to} to={to} end={end} className="nav-link">
-              <Icon aria-hidden="true" /><span>{label}</span>
+              <Icon aria-hidden="true" />
+              <span>{label}</span>
             </NavLink>
           ))}
         </nav>
       </div>
-      <div className="sidebar-footer"><span className="status-dot" aria-hidden="true" />Analytics services available</div>
+      <div className="sidebar-footer">
+        <span className="status-dot" aria-hidden="true" />
+        <span>Analytics services active</span>
+      </div>
     </aside>
   );
 }

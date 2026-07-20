@@ -5,7 +5,11 @@ function StatCard({ title, value, detail, icon: Icon, tone = "teal" }) {
     <article className={`stat-card stat-card--${tone}`}>
       <div className="stat-card-heading">
         <span>{title}</span>
-        {Icon && <span className="stat-card-icon"><Icon aria-hidden="true" /></span>}
+        {Icon && (
+          <span className="stat-card-icon" aria-hidden="true">
+            <Icon />
+          </span>
+        )}
       </div>
       <strong>{value}</strong>
       {detail && <p>{detail}</p>}

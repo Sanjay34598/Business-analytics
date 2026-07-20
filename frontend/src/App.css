@@ -1,8 +1,39 @@
-.App { min-height: 100vh; }
+.App {
+  min-height: 100vh;
+}
 
+/* ─── Focus-visible for accessibility ─── */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ─── Selection ─── */
+::selection {
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+}
+
+/* ─── Print ─── */
 @media print {
-  .sidebar, .navbar, .app-footer, .page-header-actions, .filter-panel { display: none !important; }
-  .main { margin: 0 !important; width: 100% !important; }
-  .content { padding: 0 !important; }
-  .chart-panel, .table-panel, .report-summary { box-shadow: none !important; break-inside: avoid; }
+  .sidebar,
+  .navbar,
+  .app-footer,
+  .page-header-actions,
+  .filter-panel {
+    display: none !important;
+  }
+  .main {
+    margin: 0 !important;
+    width: 100% !important;
+  }
+  .content {
+    padding: 0 !important;
+  }
+  .chart-panel,
+  .table-panel,
+  .report-summary {
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
 }

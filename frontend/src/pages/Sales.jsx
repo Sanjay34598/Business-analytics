@@ -10,15 +10,176 @@ import { getSales } from "../services/salesapi";
 import "../styles/Dashboard.css";
 
 const currency = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
-const downloadCsv = (records) => { const headers = ["Sale Date", "Product ID", "Region", "Channel", "Sales Amount", "Profit"]; const lines = records.map((row) => [row.Sale_Date, row.Product_ID, `Region ${Number(row.Region) + 1}`, Number(row.Sales_Channel) === 0 ? "Online" : "Retail", row.Sales_Amount, row.Profit].join(",")); const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([[headers.join(","), ...lines].join("\n")], { type: "text/csv" })); link.download = "sales-export.csv"; link.click(); URL.revokeObjectURL(link.href); };
+
+const downloadCsv = (records) => {
+  const headers = ["Sale Date", "Product ID", "Region", "Channel", "Sales Amount", "Profit"];
+  const lines = records.map((row) => [
+    row.Sale_Date,
+    row.Product_ID,
+    `Region ${Number(row.Region) + 1}`,
+    Number(row.Sales_Channel) === 0 ? "Online" : "Retail",
+    row.Sales_Amount,
+    row.Profit
+  ].join(","));
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(new Blob([[headers.join(","), ...lines].join("\n")], { type: "text/csv" }));
+  link.download = "sales-export.csv";
+  link.click();
+  URL.revokeObjectURL(link.href);
+};
 
 function Sales() {
-  const [sales, setSales] = useState([]); const [search, setSearch] = useState(""); const [region, setRegion] = useState("all"); const [channel, setChannel] = useState("all"); const [loading, setLoading] = useState(true); const [error, setError] = useState("");
-  const loadSales = useCallback(async () => { setLoading(true); setError(""); try { setSales(await getSales()); } catch (requestError) { setError(requestError.message || "Unable to load sales data."); } finally { setLoading(false); } }, []);
-  useEffect(() => { loadSales(); }, [loadSales]);
-  const filtered = useMemo(() => sales.filter((item) => { const query = search.toLowerCase(); const matchesSearch = !query || String(item.Product_ID).includes(query) || String(item.Sale_Date).toLowerCase().includes(query); return matchesSearch && (region === "all" || String(item.Region) === region) && (channel === "all" || String(item.Sales_Channel) === channel); }), [sales, search, region, channel]);
+  const [sales, setSales] = useState([]);
+  const [search, setSearch] = useState("");
+  const [region, setRegion] = useState("all");
+  const [channel, setChannel] = useState("all");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const loadSales = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      setSales(await getSales());
+    } catch (requestError) {
+      setError(requestError.message || "Unable to load sales data.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadSales();
+  }, [loadSales]);
+
+  const filtered = useMemo(() => 
+    sales.filter((item) => {
+      const query = search.toLowerCase();
+      const matchesSearch = !query 
+        || String(item.Product_ID).includes(query) 
+        || String(item.Sale_Date).toLowerCase().includes(query);
+      return matchesSearch 
+        && (region === "all" || String(item.Region) === region) 
+        && (channel === "all" || String(item.Sales_Channel) === channel);
+    }), [sales, search, region, channel]);
+
   const total = filtered.reduce((sum, item) => sum + Number(item.Sales_Amount || 0), 0);
-  return <div className="layout"><Sidebar /><main className="main"><Navbar /><div className="content"><PageHeader title="Sales performance" subtitle="Explore the sales records currently available to the analytics service." actions={<button className="primary-button" onClick={() => downloadCsv(filtered)} disabled={!filtered.length}><FiDownload /> Export CSV</button>} />{loading ? <Loader label="Loading sales records…" /> : error ? <div className="error-state"><strong>Sales data could not be loaded.</strong><span>{error}</span><button className="secondary-button" onClick={loadSales}>Try again</button></div> : <><section className="filter-panel"><label className="search-field"><FiSearch /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search product or date" aria-label="Search sales records" /></label><label>Region<select value={region} onChange={(event) => setRegion(event.target.value)}><option value="all">All regions</option>{[0, 1, 2, 3].map((value) => <option value={value} key={value}>Region {value + 1}</option>)}</select></label><label>Channel<select value={channel} onChange={(event) => setChannel(event.target.value)}><option value="all">All channels</option><option value="0">Online</option><option value="1">Retail</option></select></label><div className="filter-summary"><strong>₹ {currency.format(total)}</strong><span>{filtered.length} matching records</span></div></section><SalesChart sales={filtered} variant="region" title="Sales by region" /><section className="table-panel"><div className="panel-heading"><div><h2>Sales records</h2><p>Filtered rows can be exported as CSV.</p></div><span className="record-count">{filtered.length} rows</span></div><div className="table-scroll">{filtered.length ? <table><thead><tr><th>Sale date</th><th>Product</th><th>Region</th><th>Sales rep</th><th>Channel</th><th className="numeric">Sales</th><th className="numeric">Profit</th></tr></thead><tbody>{filtered.map((row, index) => <tr key={`${row.Product_ID}-${index}`}><td>{new Date(row.Sale_Date).toLocaleDateString("en-IN")}</td><td>#{row.Product_ID}</td><td>Region {Number(row.Region) + 1}</td><td>Rep {Number(row.Sales_Rep) + 1}</td><td>{Number(row.Sales_Channel) === 0 ? "Online" : "Retail"}</td><td className="numeric">₹ {currency.format(Number(row.Sales_Amount))}</td><td className={`numeric ${Number(row.Profit) < 0 ? "negative-value" : "positive-value"}`}>₹ {currency.format(Number(row.Profit))}</td></tr>)}</tbody></table> : <p className="empty-state">No sales records match the selected filters.</p>}</div></section></>}<Footer /></div></main></div>;
+
+  return (
+    <div className="layout">
+      <Sidebar />
+      <main className="main">
+        <Navbar />
+        <div className="content">
+          <PageHeader 
+            title="Sales Performance" 
+            subtitle="Explore the sales records currently available to the analytics service." 
+            actions={
+              <button 
+                type="button"
+                className="primary-button" 
+                onClick={() => downloadCsv(filtered)} 
+                disabled={!filtered.length}
+              >
+                <FiDownload /> Export CSV
+              </button>
+            } 
+          />
+          {loading ? (
+            <Loader label="Loading sales records..." />
+          ) : error ? (
+            <div className="error-state">
+              <strong>Sales data could not be loaded.</strong>
+              <span>{error}</span>
+              <button type="button" className="secondary-button" onClick={loadSales}>Try again</button>
+            </div>
+          ) : (
+            <>
+              <section className="filter-panel">
+                <label className="search-field">
+                  <FiSearch />
+                  <input 
+                    value={search} 
+                    onChange={(event) => setSearch(event.target.value)} 
+                    placeholder="Search product or date..." 
+                    aria-label="Search sales records" 
+                  />
+                </label>
+                <label>
+                  Region
+                  <select value={region} onChange={(event) => setRegion(event.target.value)}>
+                    <option value="all">All regions</option>
+                    {[0, 1, 2, 3].map((value) => (
+                      <option value={value} key={value}>Region {value + 1}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Channel
+                  <select value={channel} onChange={(event) => setChannel(event.target.value)}>
+                    <option value="all">All channels</option>
+                    <option value="0">Online</option>
+                    <option value="1">Retail</option>
+                  </select>
+                </label>
+                <div className="filter-summary">
+                  <strong>₹ {currency.format(total)}</strong>
+                  <span>{filtered.length} matching records</span>
+                </div>
+              </section>
+
+              <SalesChart sales={filtered} variant="region" title="Sales by Region" />
+
+              <section className="table-panel">
+                <div className="panel-heading">
+                  <div>
+                    <h2>Sales Records</h2>
+                    <p>Filtered rows can be exported as CSV.</p>
+                  </div>
+                  <span className="record-count">{filtered.length} rows</span>
+                </div>
+                <div className="table-scroll">
+                  {filtered.length ? (
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Sale Date</th>
+                          <th>Product</th>
+                          <th>Region</th>
+                          <th>Sales Rep</th>
+                          <th>Channel</th>
+                          <th className="numeric">Sales</th>
+                          <th className="numeric">Profit</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filtered.map((row, index) => (
+                          <tr key={`${row.Product_ID}-${index}`}>
+                            <td>{new Date(row.Sale_Date).toLocaleDateString("en-IN")}</td>
+                            <td>#{row.Product_ID}</td>
+                            <td>Region {Number(row.Region) + 1}</td>
+                            <td>Rep {Number(row.Sales_Rep) + 1}</td>
+                            <td>{Number(row.Sales_Channel) === 0 ? "Online" : "Retail"}</td>
+                            <td className="numeric">₹ {currency.format(Number(row.Sales_Amount))}</td>
+                            <td className={`numeric ${Number(row.Profit) < 0 ? "negative-value" : "positive-value"}`}>
+                              ₹ {currency.format(Number(row.Profit))}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <p className="empty-state">No sales records match the selected filters.</p>
+                  )}
+                </div>
+              </section>
+            </>
+          )}
+          <Footer />
+        </div>
+      </main>
+    </div>
+  );
 }
 
 export default Sales;

@@ -25,30 +25,217 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   const loadDashboard = useCallback(async () => {
-    setLoading(true); setError("");
+    setLoading(true);
+    setError("");
     try {
       const [salesData, forecastData] = await Promise.all([getSales(), getForecast()]);
-      setSales(salesData); setForecast(forecastData);
+      setSales(salesData);
+      setForecast(forecastData);
     } catch (requestError) {
       setError(requestError.message || "Unable to load dashboard data.");
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  useEffect(() => { loadDashboard(); }, [loadDashboard]);
+  useEffect(() => {
+    loadDashboard();
+  }, [loadDashboard]);
 
   const metrics = useMemo(() => {
     const totalSales = sales.reduce((sum, item) => sum + Number(item.Sales_Amount || 0), 0);
     const profit = sales.reduce((sum, item) => sum + Number(item.Profit || 0), 0);
     const products = new Set(sales.map((item) => item.Product_ID)).size;
-    const mape = forecast.length ? forecast.reduce((sum, item) => sum + Math.abs(Number(item.Actual_Sales) - Number(item.Predicted_Sales)) / Math.max(Math.abs(Number(item.Actual_Sales)), 1), 0) / forecast.length : null;
-    return { totalSales, profit, products, averageOrder: sales.length ? totalSales / sales.length : 0, margin: totalSales ? (profit / totalSales) * 100 : 0, accuracy: mape === null ? null : Math.max(0, 100 - (mape * 100)) };
+    const mape = forecast.length 
+      ? forecast.reduce((sum, item) => sum + Math.abs(Number(item.Actual_Sales) - Number(item.Predicted_Sales)) / Math.max(Math.abs(Number(item.Actual_Sales)), 1), 0) / forecast.length 
+      : null;
+    return {
+      totalSales,
+      profit,
+      products,
+      averageOrder: sales.length ? totalSales / sales.length : 0,
+      margin: totalSales ? (profit / totalSales) * 100 : 0,
+      accuracy: mape === null ? null : Math.max(0, 100 - (mape * 100))
+    };
   }, [sales, forecast]);
 
-  const customerDistribution = useMemo(() => sales.reduce((result, item) => { const type = labelCustomerType(item.Customer_Type); result[type] = (result[type] || 0) + 1; return result; }, {}), [sales]);
-  const customerChartData = { labels: Object.keys(customerDistribution), datasets: [{ data: Object.values(customerDistribution), backgroundColor: ["#0f766e", "#94a3b8"], borderWidth: 0, hoverOffset: 4 }] };
-  const activities = [{ title: "Sales dataset", detail: `${sales.length} records available from /sales` }, { title: "Forecast dataset", detail: `${forecast.length} model results available from /forecast` }];
+  const customerDistribution = useMemo(() => 
+    sales.reduce((result, item) => {
+      const type = labelCustomerType(item.Customer_Type);
+      result[type] = (result[type] || 0) + 1;
+      return result;
+    }, {}), [sales]);
 
-  return <div className="layout"><Sidebar /><main className="main"><Navbar /><div className="content"><PageHeader title="Business overview" subtitle="A consolidated view of sales performance and analytical model output." />{loading ? <Loader /> : error ? <div className="error-state"><strong>Dashboard data could not be loaded.</strong><span>{error}</span><button className="secondary-button" onClick={loadDashboard}>Try again</button></div> : <><div className="cards"><StatCard title="Total sales" value={`₹ ${currency.format(metrics.totalSales)}`} detail="Available sales records" icon={FiDollarSign} /><StatCard title="Net profit" value={`₹ ${currency.format(metrics.profit)}`} detail="Sales less product cost" icon={FiTrendingUp} tone="green" /><StatCard title="Sales records" value={sales.length.toLocaleString("en-IN")} detail="Records returned by the API" icon={FiShoppingBag} tone="slate" /><StatCard title="Products" value={metrics.products.toLocaleString("en-IN")} detail="Unique product IDs" icon={FiBox} tone="amber" /><StatCard title="Average order value" value={`₹ ${currency.format(metrics.averageOrder)}`} detail="Mean sales amount" icon={FiActivity} /><StatCard title="Forecast accuracy" value={metrics.accuracy === null ? "—" : `${metrics.accuracy.toFixed(1)}%`} detail="Calculated from forecast results" icon={FiPercent} tone="green" /></div><div className="dashboard-grid"><SalesChart sales={sales} /><ForecastChart forecast={forecast} /></div><div className="dashboard-grid dashboard-grid--lower"><section className="chart-panel customer-panel"><div className="panel-heading"><div><h2>Customer distribution</h2><p>Sales records by encoded customer type</p></div></div><div className="customer-chart-wrap">{Object.keys(customerDistribution).length ? <Doughnut data={customerChartData} options={{ maintainAspectRatio: false, cutout: "68%", plugins: { legend: { position: "bottom", labels: { usePointStyle: true, boxWidth: 9 } } } }} /> : <p className="empty-state">No customer data is available.</p>}</div></section><RecentActivity activities={activities} /></div><section className="table-panel"><div className="panel-heading"><div><h2>Recent sales</h2><p>The most recent records returned by the sales API</p></div><span className="record-count">{sales.length} records</span></div><div className="table-scroll">{sales.length ? <table><thead><tr><th>Sale date</th><th>Product</th><th>Region</th><th>Channel</th><th className="numeric">Sales</th><th className="numeric">Profit</th></tr></thead><tbody>{sales.slice(0, 8).map((row, index) => <tr key={`${row.Product_ID}-${index}`}><td>{new Date(row.Sale_Date).toLocaleDateString("en-IN")}</td><td>#{row.Product_ID}</td><td>Region {Number(row.Region) + 1}</td><td>{Number(row.Sales_Channel) === 0 ? "Online" : "Retail"}</td><td className="numeric">₹ {currency.format(Number(row.Sales_Amount))}</td><td className={`numeric ${Number(row.Profit) < 0 ? "negative-value" : "positive-value"}`}>₹ {currency.format(Number(row.Profit))}</td></tr>)}</tbody></table> : <p className="empty-state">No sales records are available.</p>}</div></section></>}<Footer /></div></main></div>;
+  const customerChartData = {
+    labels: Object.keys(customerDistribution),
+    datasets: [
+      {
+        data: Object.values(customerDistribution),
+        backgroundColor: ["#0d9488", "#94a3b8"],
+        borderWidth: 0,
+        hoverOffset: 4
+      }
+    ]
+  };
+
+  const activities = [
+    { title: "Sales dataset loaded", detail: `${sales.length} records available from /sales` },
+    { title: "Forecast dataset processed", detail: `${forecast.length} model results available from /forecast` }
+  ];
+
+  return (
+    <div className="layout">
+      <Sidebar />
+      <main className="main">
+        <Navbar />
+        <div className="content">
+          <PageHeader 
+            title="Business Overview" 
+            subtitle="A consolidated view of sales performance and analytical model output." 
+          />
+          {loading ? (
+            <Loader />
+          ) : error ? (
+            <div className="error-state">
+              <strong>Dashboard data could not be loaded.</strong>
+              <span>{error}</span>
+              <button type="button" className="secondary-button" onClick={loadDashboard}>Try again</button>
+            </div>
+          ) : (
+            <>
+              <div className="cards">
+                <StatCard 
+                  title="Total Sales" 
+                  value={`₹ ${currency.format(metrics.totalSales)}`} 
+                  detail="Available sales records" 
+                  icon={FiDollarSign} 
+                  tone="teal"
+                />
+                <StatCard 
+                  title="Net Profit" 
+                  value={`₹ ${currency.format(metrics.profit)}`} 
+                  detail="Sales less product cost" 
+                  icon={FiTrendingUp} 
+                  tone="green" 
+                />
+                <StatCard 
+                  title="Sales Records" 
+                  value={sales.length.toLocaleString("en-IN")} 
+                  detail="Records returned by the API" 
+                  icon={FiShoppingBag} 
+                  tone="slate" 
+                />
+                <StatCard 
+                  title="Unique Products" 
+                  value={metrics.products.toLocaleString("en-IN")} 
+                  detail="Unique product IDs" 
+                  icon={FiBox} 
+                  tone="amber" 
+                />
+                <StatCard 
+                  title="Average Order Value" 
+                  value={`₹ ${currency.format(metrics.averageOrder)}`} 
+                  detail="Mean sales amount" 
+                  icon={FiActivity} 
+                  tone="teal"
+                />
+                <StatCard 
+                  title="Forecast Accuracy" 
+                  value={metrics.accuracy === null ? "—" : `${metrics.accuracy.toFixed(1)}%`} 
+                  detail="Calculated from forecast results" 
+                  icon={FiPercent} 
+                  tone="green" 
+                />
+              </div>
+
+              <div className="dashboard-grid">
+                <SalesChart sales={sales} />
+                <ForecastChart forecast={forecast} />
+              </div>
+
+              <div className="dashboard-grid dashboard-grid--lower">
+                <section className="chart-panel customer-panel">
+                  <div className="panel-heading">
+                    <div>
+                      <h2>Customer Distribution</h2>
+                      <p>Sales records by encoded customer type</p>
+                    </div>
+                  </div>
+                  <div className="customer-chart-wrap">
+                    {Object.keys(customerDistribution).length ? (
+                      <Doughnut 
+                        data={customerChartData} 
+                        options={{
+                          maintainAspectRatio: false,
+                          cutout: "68%",
+                          plugins: {
+                            legend: {
+                              position: "bottom",
+                              labels: {
+                                usePointStyle: true,
+                                boxWidth: 8,
+                                font: { family: "Inter", size: 11, weight: "500" }
+                              }
+                            }
+                          }
+                        }} 
+                      />
+                    ) : (
+                      <p className="empty-state">No customer data is available.</p>
+                    )}
+                  </div>
+                </section>
+                <RecentActivity activities={activities} />
+              </div>
+
+              <section className="table-panel">
+                <div className="panel-heading">
+                  <div>
+                    <h2>Recent Sales</h2>
+                    <p>The most recent records returned by the sales API</p>
+                  </div>
+                  <span className="record-count">{sales.length} records</span>
+                </div>
+                <div className="table-scroll">
+                  {sales.length ? (
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Sale Date</th>
+                          <th>Product</th>
+                          <th>Region</th>
+                          <th>Channel</th>
+                          <th className="numeric">Sales</th>
+                          <th className="numeric">Profit</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sales.slice(0, 8).map((row, index) => (
+                          <tr key={`${row.Product_ID}-${index}`}>
+                            <td>{new Date(row.Sale_Date).toLocaleDateString("en-IN")}</td>
+                            <td>#{row.Product_ID}</td>
+                            <td>Region {Number(row.Region) + 1}</td>
+                            <td>{Number(row.Sales_Channel) === 0 ? "Online" : "Retail"}</td>
+                            <td className="numeric">₹ {currency.format(Number(row.Sales_Amount))}</td>
+                            <td className={`numeric ${Number(row.Profit) < 0 ? "negative-value" : "positive-value"}`}>
+                              ₹ {currency.format(Number(row.Profit))}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <p className="empty-state">No sales records are available.</p>
+                  )}
+                </div>
+              </section>
+            </>
+          )}
+          <Footer />
+        </div>
+      </main>
+    </div>
+  );
 }
 
 export default Dashboard;
