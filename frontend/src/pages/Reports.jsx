@@ -1,12 +1,26 @@
-import React from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { FiDownload, FiFileText, FiPrinter, FiTrendingUp } from "react-icons/fi";
+import Footer from "../components/Footer";
+import ForecastChart from "../components/ForecastChart";
+import Loader from "../components/Loader";
+import Navbar from "../components/Navbar";
+import PageHeader from "../components/PageHeader";
+import SalesChart from "../components/SalesChart";
+import Sidebar from "../components/Sidebar";
+import StatCard from "../components/statcard";
+import { getForecast, getRecommendations, getSales } from "../services/salesapi";
+import "../styles/Dashboard.css";
+
+const currency = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
+const exportCsv = (sales) => { const headers = ["Sale Date", "Product ID", "Sales Amount", "Profit"]; const rows = sales.map((row) => [row.Sale_Date, row.Product_ID, row.Sales_Amount, row.Profit].join(",")); const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([[headers.join(","), ...rows].join("\n")], { type: "text/csv" })); link.download = "business-summary.csv"; link.click(); URL.revokeObjectURL(link.href); };
 
 function Reports() {
-  return (
-    <div className="container mt-4">
-      <h2>Business Reports</h2>
-      <p>Generate and download business reports in PDF and CSV formats.</p>
-    </div>
-  );
+  const [sales, setSales] = useState([]); const [forecast, setForecast] = useState([]); const [recommendations, setRecommendations] = useState([]); const [loading, setLoading] = useState(true); const [error, setError] = useState("");
+  const loadReports = useCallback(async () => { setLoading(true); setError(""); try { const [salesData, forecastData, recommendationData] = await Promise.all([getSales(), getForecast(), getRecommendations()]); setSales(salesData); setForecast(forecastData); setRecommendations(recommendationData); } catch (requestError) { setError(requestError.message || "Unable to load report data."); } finally { setLoading(false); } }, []);
+  useEffect(() => { loadReports(); }, [loadReports]);
+  const summary = useMemo(() => ({ sales: sales.reduce((sum, row) => sum + Number(row.Sales_Amount || 0), 0), profit: sales.reduce((sum, row) => sum + Number(row.Profit || 0), 0), forecastRows: forecast.length }), [sales, forecast]);
+  const actions = <><button className="secondary-button" onClick={() => window.print()}><FiPrinter /> Print / Save PDF</button><button className="primary-button" onClick={() => exportCsv(sales)} disabled={!sales.length}><FiDownload /> Download CSV</button></>;
+  return <div className="layout"><Sidebar /><main className="main"><Navbar /><div className="content report-content"><PageHeader title="Business reports" subtitle="Prepare a concise report from the sales and model outputs supplied by the analytics API." actions={actions} />{loading ? <Loader label="Preparing business report…" /> : error ? <div className="error-state"><strong>Report data could not be loaded.</strong><span>{error}</span><button className="secondary-button" onClick={loadReports}>Try again</button></div> : <><div className="cards cards--three"><StatCard title="Reported sales" value={`₹ ${currency.format(summary.sales)}`} detail="Sum of available sales records" icon={FiTrendingUp} /><StatCard title="Reported profit" value={`₹ ${currency.format(summary.profit)}`} detail="Sales less product cost" icon={FiFileText} tone="green" /><StatCard title="Analytical outputs" value={(summary.forecastRows + recommendations.length).toLocaleString("en-IN")} detail="Forecast and recommendation rows" icon={FiFileText} tone="slate" /></div><section className="report-summary"><div><span>Business summary</span><h2>Sales data, forecast output, and product recommendations are available for reporting.</h2></div><dl><div><dt>Sales records</dt><dd>{sales.length}</dd></div><div><dt>Forecast results</dt><dd>{forecast.length}</dd></div><div><dt>Recommended categories</dt><dd>{recommendations.length}</dd></div></dl></section><div className="dashboard-grid"><SalesChart sales={sales} title="Sales revenue trend" /><ForecastChart forecast={forecast} title="Forecast performance" /></div></>}<Footer /></div></main></div>;
 }
 
 export default Reports;

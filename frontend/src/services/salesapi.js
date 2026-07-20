@@ -1,9 +1,6 @@
-import api from "./api";
+import { getApiData } from "./api";
 
-export const getSales = async () => {
-
-    const response = await api.get("/sales");
-
-    return response.data;
-
-};
+export const getSales = () => getApiData("/sales");
+export const getForecast = () => getApiData("/forecast");
+export const getChurn = () => getApiData("/churn");
+export const getRecommendations = () => getApiData("/recommendation");

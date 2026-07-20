@@ -1,60 +1,13 @@
-import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./../styles/Login.css";
+import "../styles/Login.css";
 
 function Login() {
   const navigate = useNavigate();
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const handleLogin = (e) => {
-    e.preventDefault();
-
-    // Temporary login (later connect to backend)
-    if (email && password) {
-      navigate("/dashboard");
-    } else {
-      alert("Please enter email and password");
-    }
-  };
-
   return (
     <div className="login-container">
       <div className="login-card">
-        <div className="login-left">
-          <h1>AI Business Consultant</h1>
-          <p>
-            Analyze your business with AI-powered insights, sales forecasting,
-            customer analytics, inventory management, and reports.
-          </p>
-        </div>
-
-        <div className="login-right">
-          <h2>Welcome Back</h2>
-
-          <form onSubmit={handleLogin}>
-            <input
-              type="email"
-              placeholder="Email Address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-
-            <button type="submit">Login</button>
-          </form>
-
-          <p className="footer-text">
-            AI Business Consultant © 2026
-          </p>
-        </div>
+        <section className="login-left"><h1>Business Analytics</h1><p>Review sales performance, forecasting output, customer insights, and product recommendations from one focused workspace.</p></section>
+        <section className="login-right"><h2>Open your workspace</h2><p className="login-description">The dashboard uses the connected analytics services to present the latest available model results.</p><button type="button" onClick={() => navigate("/")}>Open dashboard</button><p className="footer-text">Business Analytics · Decision intelligence workspace</p></section>
       </div>
     </div>
   );

@@ -1,19 +1,16 @@
-import "./../styles/Cards.css";
+import "../styles/cards.css";
 
-function StatCard({ title, value }) {
-
-    return (
-
-        <div className="stat-card">
-
-            <h4>{title}</h4>
-
-            <h2>{value}</h2>
-
-        </div>
-
-    );
-
+function StatCard({ title, value, detail, icon: Icon, tone = "teal" }) {
+  return (
+    <article className={`stat-card stat-card--${tone}`}>
+      <div className="stat-card-heading">
+        <span>{title}</span>
+        {Icon && <span className="stat-card-icon"><Icon aria-hidden="true" /></span>}
+      </div>
+      <strong>{value}</strong>
+      {detail && <p>{detail}</p>}
+    </article>
+  );
 }
 
 export default StatCard;

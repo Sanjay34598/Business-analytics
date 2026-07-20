@@ -1,7 +1,11 @@
-import axios from "axios";
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
 
-const api = axios.create({
-    baseURL: "http://127.0.0.1:5000"
-});
+export async function getApiData(path) {
+  const response = await fetch(`${API_BASE_URL}${path}`);
 
-export default api;
+  if (!response.ok) {
+    throw new Error(`Unable to load data (${response.status}).`);
+  }
+
+  return response.json();
+}

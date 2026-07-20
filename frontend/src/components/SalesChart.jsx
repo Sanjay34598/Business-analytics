@@ -1,133 +1,24 @@
-import React from "react";
+import { Bar, Line } from "react-chartjs-2";
+import { BarElement, CategoryScale, Chart as ChartJS, Filler, Legend, LineElement, LinearScale, PointElement, Tooltip } from "chart.js";
+import "../styles/chart.css";
 
-import {
-    Bar
-} from "react-chartjs-2";
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Filler, Tooltip, Legend);
 
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend
-} from "chart.js";
+const money = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
 
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend
-);
+function SalesChart({ sales = [], variant = "trend", title = "Sales trend" }) {
+  const groups = sales.reduce((result, item) => {
+    const date = new Date(item.Sale_Date);
+    const key = variant === "region" ? `Region ${Number(item.Region) + 1}` : `${date.toLocaleString("en-IN", { month: "short" })} ${date.getFullYear()}`;
+    result[key] = (result[key] || 0) + Number(item.Sales_Amount || 0);
+    return result;
+  }, {});
+  const labels = Object.keys(groups);
+  const values = Object.values(groups);
+  const data = { labels, datasets: [{ label: "Sales amount", data: values, borderColor: "#0f766e", backgroundColor: variant === "region" ? "#0f766e" : "rgba(15, 118, 110, 0.12)", fill: variant !== "region", borderWidth: 2, pointRadius: variant === "region" ? 0 : 3, tension: 0.35, borderRadius: 6 }] };
+  const options = { maintainAspectRatio: false, responsive: true, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (context) => `₹ ${money.format(context.parsed.y || 0)}` } } }, scales: { y: { grid: { color: "#eef1f4" }, ticks: { callback: (value) => `₹${money.format(value)}` } }, x: { grid: { display: false } } } };
 
-function SalesChart({ sales }) {
-
-    if (!sales || sales.length === 0) {
-
-        return (
-            <div className="table-section">
-
-                <h2>Sales by Region</h2>
-
-                <p>No sales data available.</p>
-
-            </div>
-        );
-
-    }
-
-    const regionSales = {};
-
-    sales.forEach((item) => {
-
-        const region = item.Region || "Unknown";
-
-        const amount = Number(item.Sales_Amount || 0);
-
-        if (!regionSales[region]) {
-
-            regionSales[region] = 0;
-
-        }
-
-        regionSales[region] += amount;
-
-    });
-
-    const data = {
-
-        labels: Object.keys(regionSales),
-
-        datasets: [
-
-            {
-
-                label: "Sales Amount",
-
-                data: Object.values(regionSales),
-
-                backgroundColor: [
-
-                    "#2563EB",
-                    "#16A34A",
-                    "#F59E0B",
-                    "#DC2626",
-                    "#8B5CF6",
-                    "#06B6D4"
-
-                ],
-
-                borderRadius: 8
-
-            }
-
-        ]
-
-    };
-
-    const options = {
-
-        responsive: true,
-
-        plugins: {
-
-            legend: {
-
-                position: "top"
-
-            },
-
-            title: {
-
-                display: true,
-
-                text: "Sales by Region"
-
-            }
-
-        }
-
-    };
-
-    return (
-
-        <div className="table-section">
-
-            <Bar
-
-                data={data}
-
-                options={options}
-
-            />
-
-        </div>
-
-    );
-
+  return <section className="chart-panel"><div className="panel-heading"><div><h2>{title}</h2><p>{variant === "region" ? "Revenue distribution across sales regions" : "Revenue captured from the available sales records"}</p></div></div><div className="chart-area">{labels.length ? variant === "region" ? <Bar data={data} options={options} /> : <Line data={data} options={options} /> : <p className="empty-state">No sales data is available for this chart.</p>}</div></section>;
 }
 
 export default SalesChart;

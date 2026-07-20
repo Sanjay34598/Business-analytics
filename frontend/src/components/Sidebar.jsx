@@ -1,49 +1,36 @@
-import "../styles/Navbar.css";
+import { NavLink } from "react-router-dom";
+import { FiBarChart2, FiBox, FiFileText, FiGrid, FiTrendingUp, FiUsers } from "react-icons/fi";
+import "../styles/Sidebar.css";
 
-function Navbar() {
+const navigation = [
+  { label: "Overview", to: "/", icon: FiGrid, end: true },
+  { label: "Sales", to: "/sales", icon: FiTrendingUp },
+  { label: "Forecast", to: "/forecast", icon: FiBarChart2 },
+  { label: "Customers", to: "/customers", icon: FiUsers },
+  { label: "Recommendations", to: "/inventory", icon: FiBox },
+  { label: "Reports", to: "/reports", icon: FiFileText },
+];
 
-    const today = new Date().toLocaleDateString("en-IN", {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        year: "numeric"
-    });
-
-    return (
-
-        <nav className="navbar">
-
-            <div className="navbar-left">
-
-                <h2>Business Analytics Dashboard</h2>
-
-                <p>Business Insights & Analytics</p>
-
-            </div>
-
-            <div className="navbar-right">
-
-                <input
-                    type="text"
-                    placeholder="Search..."
-                />
-
-                <span className="date">
-                    {today}
-                </span>
-
-                <div className="profile">
-
-                    PK
-
-                </div>
-
-            </div>
-
+function Sidebar() {
+  return (
+    <aside className="sidebar" aria-label="Primary navigation">
+      <div>
+        <div className="brand">
+          <span className="brand-mark">BA</span>
+          <div><strong>Business Analytics</strong><span>Decision workspace</span></div>
+        </div>
+        <nav className="sidebar-nav">
+          <p className="nav-label">Workspace</p>
+          {navigation.map(({ label, to, icon: Icon, end }) => (
+            <NavLink key={to} to={to} end={end} className="nav-link">
+              <Icon aria-hidden="true" /><span>{label}</span>
+            </NavLink>
+          ))}
         </nav>
-
-    );
-
+      </div>
+      <div className="sidebar-footer"><span className="status-dot" aria-hidden="true" />Analytics services available</div>
+    </aside>
+  );
 }
 
-export default Navbar;
+export default Sidebar;

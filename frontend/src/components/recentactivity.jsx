@@ -1,47 +1,13 @@
-function RecentActivity(){
+import { FiCheckCircle } from "react-icons/fi";
+import "../styles/activity.css";
 
-return(
-
-<div className="table-section">
-
-<h2>Recent Activity</h2>
-
-<table>
-
-<tbody>
-
-<tr>
-
-<td>✔ Dataset Loaded</td>
-
-</tr>
-
-<tr>
-
-<td>✔ Forecast Model Executed</td>
-
-</tr>
-
-<tr>
-
-<td>✔ Customer Segmentation Completed</td>
-
-</tr>
-
-<tr>
-
-<td>✔ Recommendation Model Generated</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-</div>
-
-);
-
+function RecentActivity({ activities = [] }) {
+  return (
+    <section className="activity-panel">
+      <div className="panel-heading"><div><h2>Data status</h2><p>Latest available analytical datasets</p></div></div>
+      {activities.length ? <ul className="activity-list">{activities.map((activity) => <li key={activity.title}><FiCheckCircle aria-hidden="true" /><div><strong>{activity.title}</strong><span>{activity.detail}</span></div></li>)}</ul> : <p className="empty-state">No analytical datasets are available.</p>}
+    </section>
+  );
 }
 
 export default RecentActivity;
