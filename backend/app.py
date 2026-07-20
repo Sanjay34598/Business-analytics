@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 
 from backend.routes.sales import sales_bp
 from backend.routes.forecast import forecast_bp
@@ -6,6 +7,9 @@ from backend.routes.churn import churn_bp
 from backend.routes.recommendation import recommend_bp
 
 app = Flask(__name__)
+
+# Allow requests from the React development server
+CORS(app, resources={r"/*": {"origins": "http://localhost:3001"}})
 
 app.register_blueprint(sales_bp)
 app.register_blueprint(forecast_bp)
