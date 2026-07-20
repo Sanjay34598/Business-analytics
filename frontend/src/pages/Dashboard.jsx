@@ -2,17 +2,15 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Doughnut } from "react-chartjs-2";
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
 import { FiActivity, FiBox, FiDollarSign, FiPercent, FiShoppingBag, FiTrendingUp, FiDatabase, FiClock, FiCheckCircle } from "react-icons/fi";
-import Footer from "../components/Footer";
 import ForecastChart from "../components/ForecastChart";
 import Loader from "../components/Loader";
-import Navbar from "../components/Navbar";
 import PageHeader from "../components/PageHeader";
 import RecentActivity from "../components/recentactivity";
 import SalesChart from "../components/SalesChart";
-import Sidebar from "../components/Sidebar";
 import StatCard from "../components/statcard";
 import { getForecast, getSales } from "../services/salesapi";
 import "../styles/Dashboard.css";
+import Layout from "../components/Layout";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 const currency = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
@@ -83,12 +81,9 @@ function Dashboard() {
     { title: "Forecast dataset processed", detail: `${forecast.length} model results available from /forecast` }
   ];
 
-  return (
-    <div className="layout">
-      <Sidebar />
-      <main className="main">
-        <Navbar />
-        <div className="content">
+return (
+  <Layout>
+    <div className="content">
           <PageHeader 
             title="Business Overview" 
             subtitle="A consolidated view of sales performance and analytical model output." 
@@ -264,11 +259,10 @@ function Dashboard() {
               </section>
             </>
           )}
-          <Footer />
         </div>
-      </main>
-    </div>
-  );
+      </Layout>
+
+ );
 }
 
 export default Dashboard;
