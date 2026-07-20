@@ -1,12 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FiDownload, FiFileText, FiPrinter, FiTrendingUp } from "react-icons/fi";
-import Footer from "../components/Footer";
+import Layout from "../components/Layout";
 import ForecastChart from "../components/ForecastChart";
 import Loader from "../components/Loader";
-import Navbar from "../components/Navbar";
 import PageHeader from "../components/PageHeader";
 import SalesChart from "../components/SalesChart";
-import Sidebar from "../components/Sidebar";
 import StatCard from "../components/StatCard";
 import { getForecast, getRecommendations, getSales } from "../services/salesapi";
 import "../styles/Dashboard.css";
@@ -81,11 +79,8 @@ function Reports() {
   );
 
   return (
-    <div className="layout">
-      <Sidebar />
-      <main className="main">
-        <Navbar />
-        <div className="content report-content">
+    <Layout>
+      <div className="content report-content">
           <PageHeader 
             title="Business Reports" 
             subtitle="Prepare a concise report from the sales and model outputs supplied by the analytics API." 
@@ -152,10 +147,8 @@ function Reports() {
               </div>
             </>
           )}
-          <Footer />
         </div>
-      </main>
-    </div>
+    </Layout>
   );
 }
 

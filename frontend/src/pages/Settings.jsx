@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { FiSave, FiUser, FiMonitor, FiGlobe, FiInfo } from "react-icons/fi";
-import Sidebar from "../components/Sidebar";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import Layout from "../components/Layout";
 import PageHeader from "../components/PageHeader";
 import "../styles/Dashboard.css";
 
@@ -10,11 +8,8 @@ function Settings() {
   const [activeTab, setActiveTab] = useState("preferences");
   
   return (
-    <div className="layout">
-      <Sidebar />
-      <main className="main">
-        <Navbar />
-        <div className="content">
+    <Layout>
+      <div className="content">
           <PageHeader 
             title="Settings" 
             subtitle="Manage your workspace preferences, profile, and system configurations."
@@ -190,10 +185,8 @@ function Settings() {
             </div>
           </div>
           
-          <Footer />
         </div>
-      </main>
-    </div>
+    </Layout>
   );
 }
 
