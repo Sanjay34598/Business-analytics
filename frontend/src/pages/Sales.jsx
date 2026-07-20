@@ -1,12 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FiDownload, FiSearch, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import * as XLSX from "xlsx";
-import Footer from "../components/Footer";
+import Layout from "../components/Layout";
 import Loader from "../components/Loader";
-import Navbar from "../components/Navbar";
 import PageHeader from "../components/PageHeader";
 import SalesChart from "../components/SalesChart";
-import Sidebar from "../components/Sidebar";
 import { getSales } from "../services/salesapi";
 import "../styles/Dashboard.css";
 
@@ -110,11 +108,8 @@ function Sales() {
   const currentData = filtered.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
   return (
-    <div className="layout">
-      <Sidebar />
-      <main className="main">
-        <Navbar />
-        <div className="content">
+    <Layout>
+      <div className="content">
           <PageHeader 
             title="Sales Performance" 
             subtitle="Explore the sales records currently available to the analytics service." 
@@ -270,10 +265,8 @@ function Sales() {
               </section>
             </>
           )}
-          <Footer />
         </div>
-      </main>
-    </div>
+    </Layout>
   );
 }
 

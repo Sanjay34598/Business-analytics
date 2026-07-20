@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { FiBell, FiChevronDown, FiSearch, FiPlus, FiSettings, FiUser, FiLogOut, FiInfo, FiCheckCircle } from "react-icons/fi";
+import { FiBell, FiChevronDown, FiSearch, FiPlus, FiSettings, FiUser, FiLogOut, FiInfo, FiCheckCircle, FiSun, FiMoon } from "react-icons/fi";
 import { useLocation, useNavigate } from "react-router-dom";
 import NewAnalysisModal from "./NewAnalysisModal";
+import { useTheme } from "../contexts/ThemeContext";
 import "../styles/Navbar.css";
 
 const pageNames = {
@@ -41,6 +42,7 @@ function Navbar() {
   const profileRef = useRef(null);
   const notificationRef = useRef(null);
 
+  const { theme, toggleTheme } = useTheme();
   const unreadCount = notifications.filter(n => !n.read).length;
 
   useEffect(() => {
@@ -169,6 +171,9 @@ function Navbar() {
                   <FiInfo /> About Project
                 </button>
                 <div className="dropdown-divider" />
+                <button className="dropdown-item" onClick={toggleTheme}>
+                  {theme === "light" ? <FiMoon /> : <FiSun />} Toggle Theme
+                </button>
                 <button className="dropdown-item text-danger" onClick={handleLogout}>
                   <FiLogOut /> Logout
                 </button>
