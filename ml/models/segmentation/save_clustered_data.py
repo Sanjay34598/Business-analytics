@@ -1,6 +1,7 @@
+import os
 import pandas as pd
 
-sales = pd.read_csv("ml/data/processed/sales_clustered.csv")
+sales = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "processed", "sales_clustered.csv"))
 
 print("="*50)
 print("Cluster summary")
@@ -16,7 +17,7 @@ summary = sales.groupby("Customer_Segment").agg(
 print(summary)
 
 summary.to_csv(
-	"ml/data/processed/customer_segment_summary.csv"
+	os.path.join(os.environ["ANALYSIS_DIR"], "processed", "customer_segment_summary.csv")
 )
 
 print("Summary Saved Succesfully")

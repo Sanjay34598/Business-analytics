@@ -1,8 +1,9 @@
+import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 
-sales = pd.read_csv("ml/data/processed/sales_processed.csv")
+sales = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "processed", "sales_processed.csv"))
 
 x = sales[
 	[
@@ -40,13 +41,13 @@ forecast["Predicted_Sales"] = prediction
 print(forecast.head())
 
 forecast.to_csv(
-	"ml/data/processed/forecast_results.csv",
+	os.path.join(os.environ["ANALYSIS_DIR"], "processed", "forecast_results.csv"),
 	index = False
 )
 
 import os
 import joblib
-os.makedirs("ml/data/models", exist_ok=True)
-joblib.dump(model, "ml/data/models/forecast_model.pkl")
+
+joblib.dump(model, os.path.join(os.environ["ANALYSIS_DIR"], "models", "forecast_model.pkl"))
 
 print("Forecast completed Succesfully")

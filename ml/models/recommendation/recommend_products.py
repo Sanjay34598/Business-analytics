@@ -1,5 +1,5 @@
 import pandas as pd
-sales = pd.read_csv("ml/data/processed/sales_processed.csv")
+sales = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "processed", "sales_processed.csv"))
 
 recommend = (
 	sales.groupby("Product_Category").agg(
@@ -21,12 +21,12 @@ print("="*60)
 print(recommend)
 
 recommend.to_csv(
-	"ml/data/processed/product_recommend.csv"
+	os.path.join(os.environ["ANALYSIS_DIR"], "processed", "product_recommend.csv")
 )
 
 import os
 import joblib
-os.makedirs("ml/data/models", exist_ok=True)
-joblib.dump(recommend, "ml/data/models/recommendation_model.pkl")
+
+joblib.dump(recommend, os.path.join(os.environ["ANALYSIS_DIR"], "models", "recommendation_model.pkl"))
 
 print("Saved Succesfully")

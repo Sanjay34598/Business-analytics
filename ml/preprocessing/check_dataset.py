@@ -1,7 +1,8 @@
+import os
 import pandas as pd
 
 # Load dataset
-sales = pd.read_csv("ml/data/raw/sales/sales_data.csv")
+sales = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "uploaded.csv"))
 
 print("=" * 50)
 print("DATASET OVERVIEW")

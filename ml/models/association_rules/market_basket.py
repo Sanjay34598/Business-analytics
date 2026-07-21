@@ -1,7 +1,8 @@
+import os
 import pandas as pd
 from mlxtend.frequent_patterns import apriori, association_rules
 
-sales = pd.read_csv("ml/data/processed/sales_processed.csv")
+sales = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "processed", "sales_processed.csv"))
 
 basket = pd.get_dummies(sales["Product_Category"])
 

@@ -9,7 +9,7 @@ from sklearn.metrics import(
 	confusion_matrix
 )
 
-sales = pd.read_csv("ml/data/processed/sales_processed.csv")
+sales = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "processed", "sales_processed.csv"))
 
 sales["Churn"] = (
 	sales["Profit"]<0
@@ -36,7 +36,7 @@ x_train,x_test,y_train,y_test = train_test_split(
 )
 
 import joblib
-model = joblib.load("ml/data/models/churn_model.pkl")
+model = joblib.load(os.path.join(os.environ["ANALYSIS_DIR"], "models", "churn_model.pkl"))
 
 prediction = model.predict(
 	x_test
@@ -61,11 +61,11 @@ print(cm)
 
 import os
 import json
-os.makedirs("ml/data/reports", exist_ok=True)
+
 
 metrics = {}
-if os.path.exists("ml/data/reports/metrics.json"):
-    with open("ml/data/reports/metrics.json", "r") as f:
+if os.path.exists(os.path.join(os.environ["ANALYSIS_DIR"], "reports", "metrics.json")):
+    with open(os.path.join(os.environ["ANALYSIS_DIR"], "reports", "metrics.json"), "r") as f:
         metrics = json.load(f)
 
 metrics["churn"] = {
@@ -76,5 +76,5 @@ metrics["churn"] = {
     "Confusion_Matrix": cm.tolist()
 }
 
-with open("ml/data/reports/metrics.json", "w") as f:
+with open(os.path.join(os.environ["ANALYSIS_DIR"], "reports", "metrics.json"), "w") as f:
     json.dump(metrics, f, indent=4)

@@ -1,7 +1,8 @@
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-prediction = pd.read_csv("ml/data/processed/churn_prediction.csv")
+prediction = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "processed", "churn_prediction.csv"))
 
 prediction["Prediction"].value_counts().plot(
 	kind="bar"

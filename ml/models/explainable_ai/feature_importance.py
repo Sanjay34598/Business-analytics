@@ -1,7 +1,8 @@
+import os
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 
-sales = pd.read_csv("ml/data/processed/sales_processed.csv")
+sales = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "processed", "sales_processed.csv"))
 
 X = sales[
     [

@@ -48,10 +48,10 @@ function Dashboard() {
     setError("");
     try {
       const [salesData, forecastData, recommendationData, metricsData] = await Promise.all([
-        getSales(), 
-        getForecast(),
-        getRecommendations(),
-        getMetrics()
+        getSales(activeDataset?.id), 
+        getForecast(activeDataset?.id),
+        getRecommendations(activeDataset?.id),
+        getMetrics(activeDataset?.id)
       ]);
       setSales(salesData);
       setForecast(forecastData);

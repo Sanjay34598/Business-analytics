@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 
-sales = pd.read_csv("ml/data/processed/sales_processed.csv")
+sales = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "processed", "sales_processed.csv"))
 
 sales["Churn"] = (
 	sales["Profit"]<0
@@ -43,13 +43,13 @@ result["Prediction"] = prediction
 print(result.head())
 
 result.to_csv(
-	"ml/data/processed/churn_prediction.csv",
+	os.path.join(os.environ["ANALYSIS_DIR"], "processed", "churn_prediction.csv"),
     index = False
 )
 
 import os
 import joblib
-os.makedirs("ml/data/models", exist_ok=True)
-joblib.dump(model, "ml/data/models/churn_model.pkl")
+
+joblib.dump(model, os.path.join(os.environ["ANALYSIS_DIR"], "models", "churn_model.pkl"))
 
 print(" Prediction Completed Succesfully")

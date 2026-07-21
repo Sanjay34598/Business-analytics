@@ -1,3 +1,4 @@
+import { useDataset } from "../contexts/DatasetContext";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FiDownload, FiSearch, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import * as XLSX from "xlsx";
@@ -46,6 +47,7 @@ const exportToExcel = (records) => {
 };
 
 function Sales() {
+  const { activeDataset } = useDataset();
   const [sales, setSales] = useState([]);
   const [search, setSearch] = useState("");
   const [region, setRegion] = useState("all");
@@ -62,13 +64,13 @@ function Sales() {
     setLoading(true);
     setError("");
     try {
-      setSales(await getSales());
+      setSales(await getSales(activeDataset?.id));
     } catch (requestError) {
       setError(requestError.message || "Unable to load sales data.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [activeDataset?.id]);
 
   useEffect(() => {
     loadSales();

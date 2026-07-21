@@ -1,7 +1,8 @@
+import os
 import pandas as pd
 import numpy as np
 
-file_path = "ml/data/raw/sales/sales_data.csv"
+file_path = os.path.join(os.environ["ANALYSIS_DIR"], "uploaded.csv")
 sales = pd.read_csv(file_path)
 
 # Fix incorrect CSV schema

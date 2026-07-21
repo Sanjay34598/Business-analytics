@@ -1,7 +1,8 @@
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-forecast =pd.read_csv("ml/data/processed/forecast_results.csv")
+forecast =pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "processed", "forecast_results.csv"))
 
 plt.figure(figsize=(10,5))
 

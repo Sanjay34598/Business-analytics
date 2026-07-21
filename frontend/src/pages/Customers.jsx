@@ -1,3 +1,4 @@
+import { useDataset } from "../contexts/DatasetContext";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Doughnut } from "react-chartjs-2";
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
@@ -14,6 +15,7 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 const customerType = (value) => Number(value) === 0 ? "New" : "Returning";
 
 function Customers() {
+  const { activeDataset } = useDataset();
   const [sales, setSales] = useState([]);
   const [churn, setChurn] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,7 +25,7 @@ function Customers() {
     setLoading(true);
     setError("");
     try {
-      const [salesData, churnData] = await Promise.all([getSales(), getChurn()]);
+      const [salesData, churnData] = await Promise.all([getSales(activeDataset?.id), getChurn(activeDataset?.id)]);
       setSales(salesData);
       setChurn(churnData);
     } catch (requestError) {
@@ -31,7 +33,7 @@ function Customers() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [activeDataset?.id]);
 
   useEffect(() => {
     loadCustomers();

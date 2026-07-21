@@ -1,3 +1,4 @@
+import { useDataset } from "../contexts/DatasetContext";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FiActivity, FiTarget, FiTrendingUp, FiDownload } from "react-icons/fi";
 import * as XLSX from "xlsx";
@@ -45,6 +46,7 @@ const exportToCsv = (records) => {
 };
 
 function Forecast() {
+  const { activeDataset } = useDataset();
   const [forecast, setForecast] = useState([]);
   const [horizon, setHorizon] = useState("30");
   const [loading, setLoading] = useState(true);
@@ -54,13 +56,13 @@ function Forecast() {
     setLoading(true);
     setError("");
     try {
-      setForecast(await getForecast());
+      setForecast(await getForecast(activeDataset?.id));
     } catch (requestError) {
       setError(requestError.message || "Unable to load forecast data.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [activeDataset?.id]);
 
   useEffect(() => {
     loadForecast();

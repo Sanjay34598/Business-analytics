@@ -4,8 +4,8 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from datetime import datetime
 
-os.makedirs("ml/data/reports", exist_ok=True)
-metrics_path = "ml/data/reports/metrics.json"
+
+metrics_path = os.path.join(os.environ["ANALYSIS_DIR"], "reports", "metrics.json")
 
 metrics = {}
 if os.path.exists(metrics_path):

@@ -1,42 +1,12 @@
 [
     {
-        "id": "9b34d561-82c3-4ba4-a87b-2271e858d352",
-        "name": "sample_sales_data_1000.csv",
-        "rows": 1000,
-        "columns": 18,
-        "size": "0.16 MB",
-        "uploadDate": "Jul 21, 2026, 07:27 PM",
-        "status": "Completed",
-        "active": false
-    },
-    {
-        "id": "15173355-4bc3-46f2-aed5-7900e5bfa985",
-        "name": "test_dataset_1000.csv",
-        "rows": 1000,
-        "columns": 23,
-        "size": "0.2 MB",
-        "uploadDate": "Jul 21, 2026, 07:46 PM",
-        "status": "Completed",
-        "active": false
-    },
-    {
-        "id": "56fab5a0-70d8-4f34-a787-0a6623304392",
-        "name": "sample_sales_data_5000.csv",
+        "id": "analysis_c61376e0",
+        "name": "sales_data.csv",
         "rows": 5000,
         "columns": 18,
         "size": "0.82 MB",
-        "uploadDate": "Jul 21, 2026, 07:56 PM",
-        "status": "Completed",
-        "active": true
-    },
-    {
-        "id": "c74ee34c-ac3b-4c79-84d9-ea159e479c1d",
-        "name": "test_dataset_500.csv",
-        "rows": 500,
-        "columns": 23,
-        "size": "0.1 MB",
-        "uploadDate": "Jul 21, 2026, 08:14 PM",
-        "status": "Completed",
-        "active": false
+        "uploadDate": "Jul 21, 2026, 09:18 PM",
+        "trainingDate": "Not Trained",
+        "status": "Failed"
     }
 ]

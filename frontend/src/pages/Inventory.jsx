@@ -1,3 +1,4 @@
+import { useDataset } from "../contexts/DatasetContext";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FiBox, FiLayers, FiTrendingUp } from "react-icons/fi";
 import Layout from "../components/Layout";
@@ -11,6 +12,7 @@ import "../styles/Dashboard.css";
 const currency = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
 
 function Inventory() {
+  const { activeDataset } = useDataset();
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -19,13 +21,13 @@ function Inventory() {
     setLoading(true);
     setError("");
     try {
-      setRecommendations(await getRecommendations());
+      setRecommendations(await getRecommendations(activeDataset?.id));
     } catch (requestError) {
       setError(requestError.message || "Unable to load product recommendations.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [activeDataset?.id]);
 
   useEffect(() => {
     loadRecommendations();

@@ -7,7 +7,7 @@ from sklearn.metrics import (
 	r2_score
 )
 
-sales = pd.read_csv("ml/data/processed/sales_processed.csv")
+sales = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "processed", "sales_processed.csv"))
 
 x = sales[
 	[
@@ -33,7 +33,7 @@ x_train , x_test , y_train , y_test = train_test_split(
 )
 
 import joblib
-model = joblib.load("ml/data/models/forecast_model.pkl")
+model = joblib.load(os.path.join(os.environ["ANALYSIS_DIR"], "models", "forecast_model.pkl"))
 
 prediction = model.predict(x_test)
 
@@ -51,11 +51,11 @@ print("r2 score :", r2)
 
 import os
 import json
-os.makedirs("ml/data/reports", exist_ok=True)
+
 
 metrics = {}
-if os.path.exists("ml/data/reports/metrics.json"):
-    with open("ml/data/reports/metrics.json", "r") as f:
+if os.path.exists(os.path.join(os.environ["ANALYSIS_DIR"], "reports", "metrics.json")):
+    with open(os.path.join(os.environ["ANALYSIS_DIR"], "reports", "metrics.json"), "r") as f:
         metrics = json.load(f)
 
 metrics["forecast"] = {
@@ -64,5 +64,5 @@ metrics["forecast"] = {
     "R2": r2
 }
 
-with open("ml/data/reports/metrics.json", "w") as f:
+with open(os.path.join(os.environ["ANALYSIS_DIR"], "reports", "metrics.json"), "w") as f:
     json.dump(metrics, f, indent=4)

@@ -1,7 +1,7 @@
 import pandas as pd
 
 import joblib
-recommend = joblib.load("ml/data/models/recommendation_model.pkl")
+recommend = joblib.load(os.path.join(os.environ["ANALYSIS_DIR"], "models", "recommendation_model.pkl"))
 
 print("Recomendation Summary")
 
@@ -17,8 +17,8 @@ import os
 import json
 
 metrics = {}
-if os.path.exists("ml/data/reports/metrics.json"):
-    with open("ml/data/reports/metrics.json", "r") as f:
+if os.path.exists(os.path.join(os.environ["ANALYSIS_DIR"], "reports", "metrics.json")):
+    with open(os.path.join(os.environ["ANALYSIS_DIR"], "reports", "metrics.json"), "r") as f:
         metrics = json.load(f)
 
 metrics["recommendation"] = {
@@ -28,5 +28,5 @@ metrics["recommendation"] = {
     "Total_Categories": len(recommend)
 }
 
-with open("ml/data/reports/metrics.json", "w") as f:
+with open(os.path.join(os.environ["ANALYSIS_DIR"], "reports", "metrics.json"), "w") as f:
     json.dump(metrics, f, indent=4)

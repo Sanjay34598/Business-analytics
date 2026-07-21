@@ -14,19 +14,19 @@ export const DatasetProvider = ({ children }) => {
       setDatasets(data);
       
       const savedId = localStorage.getItem("activeDatasetId");
-      let active = data.find(d => d.active) || null;
       
-      // If there's a saved dataset ID that is different from backend's active, 
-      // but the dataset is Completed, activate it immediately on the client.
-      if (savedId && active?.id !== savedId) {
-        const savedDataset = data.find(d => d.id === savedId && d.status === "Completed");
-        if (savedDataset) {
-          // Fire-and-forget activation on the backend
-          fetch(`/datasets/${savedId}/active`, { method: "PUT" }).catch(console.error);
-          active = savedDataset;
-        }
-      } else if (active?.id) {
+      let active = null;
+      if (savedId) {
+        active = data.find(d => d.id === savedId && d.status === "Completed") || null;
+      }
+      if (!active) {
+        active = data.find(d => d.status === "Completed") || null;
+      }
+      
+      if (active) {
         localStorage.setItem("activeDatasetId", active.id);
+      } else {
+        localStorage.removeItem("activeDatasetId");
       }
       
       setActiveDataset(active);
@@ -61,17 +61,13 @@ export const DatasetProvider = ({ children }) => {
   };
 
   const activateDataset = async (id) => {
-    const res = await fetch(`/datasets/${id}/active`, {
-      method: "PUT",
-    });
-    
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.error || "Failed to activate dataset");
+    const targetDataset = datasets.find(d => d.id === id);
+    if (!targetDataset || targetDataset.status !== "Completed") {
+      throw new Error("Dataset is not ready to be activated");
     }
     
     localStorage.setItem("activeDatasetId", id);
-    await fetchDatasets();
+    setActiveDataset(targetDataset);
   };
 
   const deleteDataset = async (id) => {

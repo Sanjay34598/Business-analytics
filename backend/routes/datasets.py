@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify
 import os
 import subprocess
-from services.dataset_manager import get_datasets, add_dataset, set_active_dataset, delete_dataset, update_dataset_status
-from services.load_data import reload_data
+import datetime
+from services.dataset_manager import get_datasets, add_dataset, delete_dataset, update_dataset_status
 
 datasets_bp = Blueprint("datasets", __name__)
 
@@ -36,26 +36,10 @@ def upload_dataset():
 @datasets_bp.route("/datasets/<dataset_id>/retrain", methods=["POST"])
 def retrain_dataset(dataset_id):
     try:
-        # First activate it to ensure raw data is correctly positioned
-        set_active_dataset(dataset_id)
-        
         return analyze_dataset_core(dataset_id)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
         
-@datasets_bp.route("/datasets/<dataset_id>/active", methods=["PUT"])
-def activate_dataset(dataset_id):
-    try:
-        dataset_info = set_active_dataset(dataset_id)
-        reload_data()
-        return jsonify({"message": "Dataset activated successfully", "dataset": dataset_info})
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 404
-    except FileNotFoundError as e:
-        return jsonify({"error": str(e)}), 404
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
 @datasets_bp.route("/datasets/<dataset_id>", methods=["DELETE"])
 def remove_dataset(dataset_id):
     try:
@@ -74,18 +58,14 @@ def analyze_dataset_core(dataset_id):
         current_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.dirname(os.path.dirname(current_dir))
         
-        # Paths
-        dataset_info = next((d for d in get_datasets() if d["id"] == dataset_id), None)
-        uploaded_path = os.path.join(project_root, "backend", "data", "uploads", f"{dataset_id}.csv") if dataset_info else "Unknown"
-        pipeline_input_path = os.path.join(project_root, "ml", "data", "raw", "sales", "sales_data.csv")
+        # Determine analysis directory
+        analysis_dir = os.path.join(project_root, "backend", "data", "analysis_runs", dataset_id)
         
-        print(f"Active dataset ID: {dataset_id}")
-        print(f"Uploaded dataset path: {uploaded_path}")
-        print(f"Pipeline input path: {pipeline_input_path}")
+        if not os.path.exists(analysis_dir):
+            return jsonify({"success": False, "message": "Dataset analysis directory missing"}), 404
         
         env = os.environ.copy()
-        if dataset_id:
-            env["DATASET_ID"] = dataset_id
+        env["ANALYSIS_DIR"] = analysis_dir
 
         result = subprocess.run(
             ["python", "ml/pipeline/run_pipeline.py"],
@@ -96,8 +76,7 @@ def analyze_dataset_core(dataset_id):
         )
         
         if result.returncode != 0:
-            if dataset_id:
-                update_dataset_status(dataset_id, "Failed")
+            update_dataset_status(dataset_id, "Failed")
             
             stderr = result.stderr or ""
             stdout = result.stdout or ""
@@ -132,8 +111,8 @@ def analyze_dataset_core(dataset_id):
                 "exit_code": result.returncode
             }), 500
             
-        # Verify files exist and are non-empty
-        processed_dir = os.path.join(project_root, "ml", "data", "processed")
+        # Verify output files in the analysis directory
+        processed_dir = os.path.join(analysis_dir, "processed")
         required_files = [
             "sales_processed.csv",
             "forecast_results.csv",
@@ -144,8 +123,7 @@ def analyze_dataset_core(dataset_id):
         for f in required_files:
             file_path = os.path.join(processed_dir, f)
             if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
-                if dataset_id:
-                    update_dataset_status(dataset_id, "Failed")
+                update_dataset_status(dataset_id, "Failed")
                 return jsonify({
                     "success": False,
                     "failed_stage": "File Verification",
@@ -157,51 +135,23 @@ def analyze_dataset_core(dataset_id):
                     "exit_code": 1
                 }), 500
                 
-        # Backup processed files, models, and reports for dataset switching
-        import shutil
-        dataset_runs_dir = os.path.join(project_root, "backend", "data", "analysis_runs", dataset_id)
-        dataset_data_dir = os.path.join(dataset_runs_dir, "data")
-        dataset_models_dir = os.path.join(dataset_runs_dir, "models")
-        dataset_reports_dir = os.path.join(dataset_runs_dir, "reports")
-        
-        os.makedirs(dataset_data_dir, exist_ok=True)
-        os.makedirs(dataset_models_dir, exist_ok=True)
-        os.makedirs(dataset_reports_dir, exist_ok=True)
-        
-        # Backup data
-        for f in required_files:
-            shutil.copy2(os.path.join(processed_dir, f), os.path.join(dataset_data_dir, f))
+        # Validate data by checking row counts
+        import pandas as pd
+        try:
+            sales_df = pd.read_csv(os.path.join(processed_dir, "sales_processed.csv"))
+            forecast_df = pd.read_csv(os.path.join(processed_dir, "forecast_results.csv"))
+            churn_df = pd.read_csv(os.path.join(processed_dir, "churn_prediction.csv"))
+            rec_df = pd.read_csv(os.path.join(processed_dir, "product_recommend.csv"))
             
-        # Backup models
-        models_dir = os.path.join(project_root, "ml", "data", "models")
-        if os.path.exists(models_dir):
-            for f in os.listdir(models_dir):
-                if f.endswith(".pkl"):
-                    shutil.copy2(os.path.join(models_dir, f), os.path.join(dataset_models_dir, f))
-                    
-        # Backup reports
-        reports_dir = os.path.join(project_root, "ml", "data", "reports")
-        if os.path.exists(reports_dir):
-            for f in os.listdir(reports_dir):
-                shutil.copy2(os.path.join(reports_dir, f), os.path.join(dataset_reports_dir, f))
-                
-        # Reload data
-        reload_data()
-        
-        import services.load_data as ld
-        sales_len = len(ld.sales) if ld.sales is not None and not ld.sales.empty else 0
-        forecast_len = len(ld.forecast) if ld.forecast is not None and not ld.forecast.empty else 0
-        churn_len = len(ld.churn) if ld.churn is not None and not ld.churn.empty else 0
-        rec_len = len(ld.recommendation) if ld.recommendation is not None and not ld.recommendation.empty else 0
-        
-        print(f"Sales rows: {sales_len}")
-        print(f"Forecast rows: {forecast_len}")
-        print(f"Customer/Churn rows: {churn_len}")
-        print(f"Recommendation rows: {rec_len}")
-        
+            sales_len = len(sales_df)
+            forecast_len = len(forecast_df)
+            churn_len = len(churn_df)
+            rec_len = len(rec_df)
+        except Exception as e:
+            sales_len = forecast_len = churn_len = rec_len = 0
+
         if sales_len == 0 or forecast_len == 0 or churn_len == 0 or rec_len == 0:
-            if dataset_id:
-                update_dataset_status(dataset_id, "Failed")
+            update_dataset_status(dataset_id, "Failed")
             return jsonify({
                 "success": False,
                 "failed_stage": "Data Validation",
@@ -213,10 +163,9 @@ def analyze_dataset_core(dataset_id):
                 "exit_code": 1
             }), 500
 
-        if dataset_id:
-            update_dataset_status(dataset_id, "Completed")
+        training_date = datetime.datetime.now().strftime("%b %d, %Y, %I:%M %p")
+        update_dataset_status(dataset_id, "Completed", training_date=training_date)
             
-        import datetime
         return jsonify({
             "success": True,
             "dataset": dataset_id,
@@ -233,8 +182,7 @@ def analyze_dataset_core(dataset_id):
         })
         
     except Exception as e:
-        if dataset_id:
-            update_dataset_status(dataset_id, "Failed")
+        update_dataset_status(dataset_id, "Failed")
         import traceback
         return jsonify({
             "success": False,

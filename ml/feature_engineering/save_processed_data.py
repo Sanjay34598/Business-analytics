@@ -1,7 +1,8 @@
+import os
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
-sales = pd.read_csv("ml/data/cleaned/sales_data_cleaned.csv")
+sales = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "cleaned.csv"))
 
 sales["Sale_Date"]=pd.to_datetime(sales["Sale_Date"])
 
@@ -30,7 +31,7 @@ for column in [
 	sales[column]=encoder.fit_transform(sales[column])
 
 sales.to_csv(
-	"ml/data/processed/sales_processed.csv",
+	os.path.join(os.environ["ANALYSIS_DIR"], "processed", "sales_processed.csv"),
     index = False
 )
 

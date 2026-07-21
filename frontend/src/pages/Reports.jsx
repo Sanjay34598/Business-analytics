@@ -1,3 +1,4 @@
+import { useDataset } from "../contexts/DatasetContext";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FiDownload, FiFileText, FiPrinter, FiTrendingUp } from "react-icons/fi";
 import Layout from "../components/Layout";
@@ -28,6 +29,7 @@ const exportCsv = (sales) => {
 };
 
 function Reports() {
+  const { activeDataset } = useDataset();
   const [sales, setSales] = useState([]);
   const [forecast, setForecast] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
@@ -39,9 +41,9 @@ function Reports() {
     setError("");
     try {
       const [salesData, forecastData, recommendationData] = await Promise.all([
-        getSales(),
-        getForecast(),
-        getRecommendations()
+        getSales(activeDataset?.id),
+        getForecast(activeDataset?.id),
+        getRecommendations(activeDataset?.id)
       ]);
       setSales(salesData);
       setForecast(forecastData);
@@ -51,7 +53,7 @@ function Reports() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [activeDataset?.id]);
 
   useEffect(() => {
     loadReports();

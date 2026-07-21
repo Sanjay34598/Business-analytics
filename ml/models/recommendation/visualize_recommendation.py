@@ -1,7 +1,8 @@
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-recommend = pd.read_csv("ml/data/processed/product_recommend.csv")
+recommend = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "processed", "product_recommend.csv"))
 
 plt.figure(figsize=(8,5))
 

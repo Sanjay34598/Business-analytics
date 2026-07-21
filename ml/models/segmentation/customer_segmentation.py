@@ -1,8 +1,9 @@
+import os
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 
-sales = pd.read_csv("ml/data/processed/sales_processed.csv")
+sales = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "processed", "sales_processed.csv"))
 
 features = sales[
 	[
@@ -47,7 +48,7 @@ print(
 )
 
 sales.to_csv(
-	"ml/data/processed/sales_clustered.csv",
+	os.path.join(os.environ["ANALYSIS_DIR"], "processed", "sales_clustered.csv"),
      index=False
 )
 

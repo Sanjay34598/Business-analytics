@@ -1,6 +1,7 @@
+import os
 import pandas as pd
 
-sales = pd.read_csv("ml/data/cleaned/sales_data_cleaned.csv")
+sales = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "cleaned.csv"))
 
 category_sales = sales.groupby("Product_Category")["Sales_Amount"].sum()
 

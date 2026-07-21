@@ -1,7 +1,8 @@
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-sales = pd.read_csv("ml/data/cleaned/sales_data_cleaned.csv")
+sales = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "cleaned.csv"))
 
 customer = sales["Customer_Type"].value_counts()
 
