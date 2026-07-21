@@ -9,7 +9,7 @@ import PageHeader from "../components/PageHeader";
 import RecentActivity from "../components/RecentActivity";
 import SalesChart from "../components/SalesChart";
 import StatCard from "../components/StatCard";
-import { getForecast, getSales } from "../services/salesapi";
+import { getForecast, getSales, getRecommendations } from "../services/salesapi";
 import { useDataset } from "../contexts/DatasetContext";
 import "../styles/Dashboard.css";
 import Layout from "../components/Layout";
@@ -22,6 +22,7 @@ function Dashboard() {
   const { activeDataset } = useDataset();
   const [sales, setSales] = useState([]);
   const [forecast, setForecast] = useState([]);
+  const [recommendations, setRecommendations] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -29,9 +30,14 @@ function Dashboard() {
     setLoading(true);
     setError("");
     try {
-      const [salesData, forecastData] = await Promise.all([getSales(), getForecast()]);
+      const [salesData, forecastData, recommendationData] = await Promise.all([
+        getSales(), 
+        getForecast(),
+        getRecommendations()
+      ]);
       setSales(salesData);
       setForecast(forecastData);
+      setRecommendations(recommendationData);
     } catch (requestError) {
       setError(requestError.message || "Unable to load dashboard data.");
     } finally {
@@ -102,7 +108,6 @@ return (
           ) : (
             <>
               {activeDataset && (
-                <>
                   <div style={{ display: 'flex', gap: '24px', padding: '16px 24px', background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', marginBottom: 'var(--space-lg)' }}>
                     <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-md)', background: 'var(--color-primary-light)', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -134,6 +139,7 @@ return (
                       </div>
                     </div>
                   </div>
+              )}
 
                   <div className="cards">
                     <StatCard 
@@ -223,6 +229,42 @@ return (
               <section className="table-panel">
                 <div className="panel-heading">
                   <div>
+                    <h2>Top Recommendations</h2>
+                    <p>Product categories recommended for restock</p>
+                  </div>
+                  <span className="record-count">{recommendations.length} categories</span>
+                </div>
+                <div className="table-scroll">
+                  {recommendations.length ? (
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Category</th>
+                          <th className="numeric">Quantity Sold</th>
+                          <th className="numeric">Average Profit</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {recommendations.slice(0, 5).map((row, index) => (
+                          <tr key={`rec-${index}`}>
+                            <td>Category {row.Product_Category}</td>
+                            <td className="numeric">{Number(row.Total_Sold).toLocaleString()} units</td>
+                            <td className={`numeric ${Number(row.Average_Profit) < 0 ? "negative-value" : "positive-value"}`}>
+                              ₹ {currency.format(Number(row.Average_Profit))}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <p className="empty-state">No recommendations are available.</p>
+                  )}
+                </div>
+              </section>
+
+              <section className="table-panel">
+                <div className="panel-heading">
+                  <div>
                     <h2>Recent Sales</h2>
                     <p>The most recent records returned by the sales API</p>
                   </div>
@@ -261,8 +303,6 @@ return (
                   )}
                 </div>
               </section>
-                </>
-              )}
             </>
           )}
         </div>
