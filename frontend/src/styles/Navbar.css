@@ -183,9 +183,14 @@
   color: var(--color-text-secondary);
 }
 
+/* Notification & Profile Dropdown Container */
+.dropdown-container {
+  position: relative;
+}
+
 /* Notification Dropdown Specifics */
 .notification-menu {
-  width: 320px;
+  width: 340px;
 }
 
 .notification-actions button {
@@ -255,9 +260,32 @@
   background: var(--color-danger-bg) !important;
 }
 
+.mobile-menu-btn {
+  display: none;
+}
+
 @media (max-width: 960px) {
   .navbar-center {
     display: none;
+  }
+}
+
+@media (max-width: 860px) {
+  .mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--color-text);
+    padding: 8px;
+    margin-right: 8px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+  }
+  .mobile-menu-btn svg {
+    width: 20px;
+    height: 20px;
   }
 }
 

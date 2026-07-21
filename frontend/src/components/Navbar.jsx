@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { FiBell, FiChevronDown, FiSearch, FiPlus, FiSettings, FiUser, FiLogOut, FiInfo, FiCheckCircle, FiSun, FiMoon } from "react-icons/fi";
+import { FiBell, FiChevronDown, FiSearch, FiPlus, FiSettings, FiUser, FiLogOut, FiInfo, FiCheckCircle, FiSun, FiMoon, FiMenu } from "react-icons/fi";
 import { useLocation, useNavigate } from "react-router-dom";
 import NewAnalysisModal from "./NewAnalysisModal";
 import { useTheme } from "../contexts/ThemeContext";
@@ -24,7 +24,7 @@ const mockNotifications = [
   { id: 3, text: "Customer segments updated", time: "3h ago", read: true },
 ];
 
-function Navbar() {
+function Navbar({ onMenuClick }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const today = new Date().toLocaleDateString("en-US", {
@@ -86,6 +86,9 @@ function Navbar() {
     <>
       <header className="navbar">
         <div className="navbar-left">
+          <button className="mobile-menu-btn" onClick={onMenuClick} aria-label="Open menu">
+            <FiMenu />
+          </button>
           <div className="navbar-context">
             <span>Analytics Workspace</span>
             <strong>{pageNames[pathname] || "Business Analytics"}</strong>

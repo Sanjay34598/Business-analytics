@@ -22,40 +22,36 @@ function Settings() {
             }
           />
 
-          <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
+          <div style={{ display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
             
-            <div style={{ width: '220px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <nav className="settings-nav">
               <button 
-                className={`nav-link ${activeTab === 'preferences' ? 'active' : ''}`}
-                style={{ background: activeTab === 'preferences' ? 'var(--color-surface)' : 'transparent', color: activeTab === 'preferences' ? 'var(--color-primary)' : 'var(--color-text-secondary)', fontWeight: activeTab === 'preferences' ? 600 : 500 }}
+                className={`settings-nav-item ${activeTab === 'preferences' ? 'active' : ''}`}
                 onClick={() => setActiveTab('preferences')}
               >
                 <FiMonitor /> Preferences
               </button>
               <button 
-                className={`nav-link ${activeTab === 'profile' ? 'active' : ''}`}
-                style={{ background: activeTab === 'profile' ? 'var(--color-surface)' : 'transparent', color: activeTab === 'profile' ? 'var(--color-primary)' : 'var(--color-text-secondary)', fontWeight: activeTab === 'profile' ? 600 : 500 }}
+                className={`settings-nav-item ${activeTab === 'profile' ? 'active' : ''}`}
                 onClick={() => setActiveTab('profile')}
               >
                 <FiUser /> Profile
               </button>
               <button 
-                className={`nav-link ${activeTab === 'localization' ? 'active' : ''}`}
-                style={{ background: activeTab === 'localization' ? 'var(--color-surface)' : 'transparent', color: activeTab === 'localization' ? 'var(--color-primary)' : 'var(--color-text-secondary)', fontWeight: activeTab === 'localization' ? 600 : 500 }}
+                className={`settings-nav-item ${activeTab === 'localization' ? 'active' : ''}`}
                 onClick={() => setActiveTab('localization')}
               >
                 <FiGlobe /> Localization
               </button>
               <button 
-                className={`nav-link ${activeTab === 'about' ? 'active' : ''}`}
-                style={{ background: activeTab === 'about' ? 'var(--color-surface)' : 'transparent', color: activeTab === 'about' ? 'var(--color-primary)' : 'var(--color-text-secondary)', fontWeight: activeTab === 'about' ? 600 : 500 }}
+                className={`settings-nav-item ${activeTab === 'about' ? 'active' : ''}`}
                 onClick={() => setActiveTab('about')}
               >
                 <FiInfo /> About
               </button>
-            </div>
+            </nav>
 
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '24px', minWidth: 0 }}>
               
               {activeTab === 'preferences' && (
                 <section className="table-panel">
