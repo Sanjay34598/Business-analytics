@@ -4,6 +4,7 @@ import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
 import { FiAlertTriangle, FiCheckCircle, FiUsers } from "react-icons/fi";
 import Layout from "../components/Layout";
 import Loader from "../components/Loader";
+import ErrorState from "../components/ErrorState";
 import PageHeader from "../components/PageHeader";
 import StatCard from "../components/StatCard";
 import { getChurn, getSales } from "../services/salesapi";
@@ -66,11 +67,11 @@ function Customers() {
           {loading ? (
             <Loader label="Loading customer insights..." />
           ) : error ? (
-            <div className="error-state">
-              <strong>Customer data could not be loaded.</strong>
-              <span>{error}</span>
-              <button type="button" className="secondary-button" onClick={loadCustomers}>Try again</button>
-            </div>
+            <ErrorState 
+              title="Customer data could not be loaded" 
+              message={error} 
+              onRetry={loadCustomers} 
+            />
           ) : (
             <>
               <div className="cards cards--three">

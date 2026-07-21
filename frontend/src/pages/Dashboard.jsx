@@ -4,6 +4,7 @@ import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
 import { FiActivity, FiBox, FiDollarSign, FiPercent, FiShoppingBag, FiTrendingUp, FiDatabase, FiClock, FiCheckCircle } from "react-icons/fi";
 import ForecastChart from "../components/ForecastChart";
 import Loader from "../components/Loader";
+import ErrorState from "../components/ErrorState";
 import PageHeader from "../components/PageHeader";
 import RecentActivity from "../components/RecentActivity";
 import SalesChart from "../components/SalesChart";
@@ -91,11 +92,11 @@ return (
           {loading ? (
             <Loader />
           ) : error ? (
-            <div className="error-state">
-              <strong>Dashboard data could not be loaded.</strong>
-              <span>{error}</span>
-              <button type="button" className="secondary-button" onClick={loadDashboard}>Try again</button>
-            </div>
+            <ErrorState 
+              title="Dashboard data could not be loaded" 
+              message={error} 
+              onRetry={loadDashboard} 
+            />
           ) : (
             <>
               {/* Dataset Metadata Header */}

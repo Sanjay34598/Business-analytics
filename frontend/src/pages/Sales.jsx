@@ -3,6 +3,7 @@ import { FiDownload, FiSearch, FiChevronLeft, FiChevronRight } from "react-icons
 import * as XLSX from "xlsx";
 import Layout from "../components/Layout";
 import Loader from "../components/Loader";
+import ErrorState from "../components/ErrorState";
 import PageHeader from "../components/PageHeader";
 import SalesChart from "../components/SalesChart";
 import { getSales } from "../services/salesapi";
@@ -51,6 +52,7 @@ function Sales() {
   const [channel, setChannel] = useState("all");
   const [rep, setRep] = useState("all");
   const [dateRange, setDateRange] = useState("all");
+  const [sortConfig, setSortConfig] = useState({ key: "Sale_Date", direction: "desc" });
   const [page, setPage] = useState(1);
   const rowsPerPage = 15;
   const [loading, setLoading] = useState(true);
@@ -103,9 +105,38 @@ function Sales() {
     });
   }, [sales, search, region, channel, rep, dateRange]);
 
-  const total = filtered.reduce((sum, item) => sum + Number(item.Sales_Amount || 0), 0);
-  const totalPages = Math.ceil(filtered.length / rowsPerPage);
-  const currentData = filtered.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+  const sorted = useMemo(() => {
+    let sortableItems = [...filtered];
+    if (sortConfig !== null) {
+      sortableItems.sort((a, b) => {
+        let aVal = a[sortConfig.key];
+        let bVal = b[sortConfig.key];
+        if (sortConfig.key === "Sale_Date") {
+          aVal = new Date(aVal);
+          bVal = new Date(bVal);
+        } else if (["Sales_Amount", "Profit", "Region", "Sales_Rep", "Sales_Channel"].includes(sortConfig.key)) {
+          aVal = Number(aVal);
+          bVal = Number(bVal);
+        }
+        if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+        if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+    return sortableItems;
+  }, [filtered, sortConfig]);
+
+  const handleSort = (key) => {
+    let direction = "asc";
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const total = sorted.reduce((sum, item) => sum + Number(item.Sales_Amount || 0), 0);
+  const totalPages = Math.ceil(sorted.length / rowsPerPage);
+  const currentData = sorted.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
   return (
     <Layout>
@@ -137,11 +168,11 @@ function Sales() {
           {loading ? (
             <Loader label="Loading sales records..." />
           ) : error ? (
-            <div className="error-state">
-              <strong>Sales data could not be loaded.</strong>
-              <span>{error}</span>
-              <button type="button" className="secondary-button" onClick={loadSales}>Try again</button>
-            </div>
+            <ErrorState 
+              title="Sales data could not be loaded" 
+              message={error} 
+              onRetry={loadSales} 
+            />
           ) : (
             <>
               <section className="filter-panel" style={{ flexWrap: 'wrap' }}>
@@ -209,13 +240,13 @@ function Sales() {
                     <table>
                       <thead>
                         <tr>
-                          <th>Sale Date</th>
-                          <th>Product</th>
-                          <th>Region</th>
-                          <th>Sales Rep</th>
-                          <th>Channel</th>
-                          <th className="numeric">Sales</th>
-                          <th className="numeric">Profit</th>
+                          <th onClick={() => handleSort("Sale_Date")} style={{ cursor: 'pointer' }}>Sale Date {sortConfig.key === "Sale_Date" && (sortConfig.direction === "asc" ? "↑" : "↓")}</th>
+                          <th onClick={() => handleSort("Product_ID")} style={{ cursor: 'pointer' }}>Product {sortConfig.key === "Product_ID" && (sortConfig.direction === "asc" ? "↑" : "↓")}</th>
+                          <th onClick={() => handleSort("Region")} style={{ cursor: 'pointer' }}>Region {sortConfig.key === "Region" && (sortConfig.direction === "asc" ? "↑" : "↓")}</th>
+                          <th onClick={() => handleSort("Sales_Rep")} style={{ cursor: 'pointer' }}>Sales Rep {sortConfig.key === "Sales_Rep" && (sortConfig.direction === "asc" ? "↑" : "↓")}</th>
+                          <th onClick={() => handleSort("Sales_Channel")} style={{ cursor: 'pointer' }}>Channel {sortConfig.key === "Sales_Channel" && (sortConfig.direction === "asc" ? "↑" : "↓")}</th>
+                          <th onClick={() => handleSort("Sales_Amount")} className="numeric" style={{ cursor: 'pointer' }}>Sales {sortConfig.key === "Sales_Amount" && (sortConfig.direction === "asc" ? "↑" : "↓")}</th>
+                          <th onClick={() => handleSort("Profit")} className="numeric" style={{ cursor: 'pointer' }}>Profit {sortConfig.key === "Profit" && (sortConfig.direction === "asc" ? "↑" : "↓")}</th>
                         </tr>
                       </thead>
                       <tbody>

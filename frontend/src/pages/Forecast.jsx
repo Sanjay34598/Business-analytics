@@ -4,6 +4,7 @@ import * as XLSX from "xlsx";
 import Layout from "../components/Layout";
 import ForecastChart from "../components/ForecastChart";
 import Loader from "../components/Loader";
+import ErrorState from "../components/ErrorState";
 import PageHeader from "../components/PageHeader";
 import StatCard from "../components/StatCard";
 import { getForecast } from "../services/salesapi";
@@ -24,6 +25,23 @@ const exportToExcel = (records) => {
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Forecast Output");
   XLSX.writeFile(workbook, "forecast-export.xlsx");
+};
+
+const exportToCsv = (records) => {
+  const headers = ["Region", "Category", "Month", "Actual Sales", "Predicted Sales", "Variance"];
+  const lines = records.map((row) => [
+    `Region ${Number(row.Region) + 1}`,
+    `Category ${Number(row.Product_Category) + 1}`,
+    row.Month,
+    Number(row.Actual_Sales),
+    Number(row.Predicted_Sales),
+    Number(row.Predicted_Sales) - Number(row.Actual_Sales)
+  ].join(","));
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(new Blob([[headers.join(","), ...lines].join("\n")], { type: "text/csv" }));
+  link.download = "forecast-export.csv";
+  link.click();
+  URL.revokeObjectURL(link.href);
 };
 
 function Forecast() {
@@ -75,24 +93,34 @@ function Forecast() {
             title="Sales Forecast" 
             subtitle="Review the available regression model results against actual sales values."
             actions={
-              <button 
-                type="button"
-                className="primary-button" 
-                onClick={() => exportToExcel(forecast)} 
-                disabled={!forecast.length}
-              >
-                <FiDownload /> Download Output
-              </button>
+              <>
+                <button 
+                  type="button"
+                  className="secondary-button" 
+                  onClick={() => exportToCsv(forecast)} 
+                  disabled={!forecast.length}
+                >
+                  <FiDownload /> CSV
+                </button>
+                <button 
+                  type="button"
+                  className="primary-button" 
+                  onClick={() => exportToExcel(forecast)} 
+                  disabled={!forecast.length}
+                >
+                  <FiDownload /> Excel
+                </button>
+              </>
             } 
           />
           {loading ? (
             <Loader label="Loading forecast results..." />
           ) : error ? (
-            <div className="error-state">
-              <strong>Forecast data could not be loaded.</strong>
-              <span>{error}</span>
-              <button type="button" className="secondary-button" onClick={loadForecast}>Try again</button>
-            </div>
+            <ErrorState 
+              title="Forecast data could not be loaded" 
+              message={error} 
+              onRetry={loadForecast} 
+            />
           ) : (
             <>
               <div className="filter-panel" style={{ marginBottom: 'var(--space-lg)', padding: '12px var(--space-md)' }}>

@@ -3,6 +3,7 @@ import { FiDownload, FiFileText, FiPrinter, FiTrendingUp } from "react-icons/fi"
 import Layout from "../components/Layout";
 import ForecastChart from "../components/ForecastChart";
 import Loader from "../components/Loader";
+import ErrorState from "../components/ErrorState";
 import PageHeader from "../components/PageHeader";
 import SalesChart from "../components/SalesChart";
 import StatCard from "../components/StatCard";
@@ -89,11 +90,11 @@ function Reports() {
           {loading ? (
             <Loader label="Preparing business report..." />
           ) : error ? (
-            <div className="error-state">
-              <strong>Report data could not be loaded.</strong>
-              <span>{error}</span>
-              <button type="button" className="secondary-button" onClick={loadReports}>Try again</button>
-            </div>
+            <ErrorState 
+              title="Report data could not be loaded" 
+              message={error} 
+              onRetry={loadReports} 
+            />
           ) : (
             <>
               <div className="cards cards--three">

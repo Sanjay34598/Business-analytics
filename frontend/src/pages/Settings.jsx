@@ -2,10 +2,12 @@ import { useState } from "react";
 import { FiSave, FiUser, FiMonitor, FiGlobe, FiInfo } from "react-icons/fi";
 import Layout from "../components/Layout";
 import PageHeader from "../components/PageHeader";
+import { useTheme } from "../contexts/ThemeContext";
 import "../styles/Dashboard.css";
 
 function Settings() {
   const [activeTab, setActiveTab] = useState("preferences");
+  const { theme, setTheme } = useTheme();
   
   return (
     <Layout>
@@ -66,10 +68,9 @@ function Settings() {
                   <div className="filter-panel" style={{ flexDirection: 'column', alignItems: 'stretch', boxShadow: 'none', border: 'none', padding: 0 }}>
                     <label>
                       Theme
-                      <select defaultValue="light">
+                      <select value={theme} onChange={(e) => setTheme(e.target.value)}>
                         <option value="light">Light Mode</option>
-                        <option value="dark">Dark Mode (Coming Soon)</option>
-                        <option value="system">System Default</option>
+                        <option value="dark">Dark Mode</option>
                       </select>
                     </label>
                     <label style={{ marginTop: '16px' }}>
