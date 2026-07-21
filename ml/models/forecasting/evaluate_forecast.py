@@ -1,4 +1,11 @@
 import os
+analysis_dir = os.environ.get("ANALYSIS_DIR", "")
+if analysis_dir:
+    for sub in ["dataset", "processed", "models", "reports", "reports/charts", "logs"]:
+        os.makedirs(os.path.join(analysis_dir, sub), exist_ok=True)
+
+import json
+import os
 import pandas as pd
 from sklearn.model_selection  import train_test_split
 from sklearn.linear_model import LinearRegression
@@ -8,7 +15,7 @@ from sklearn.metrics import (
 	r2_score
 )
 
-sales = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "processed", "sales_processed.csv"))
+sales = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "processed", "sales.csv"))
 
 x = sales[
 	[
@@ -34,7 +41,7 @@ x_train , x_test , y_train , y_test = train_test_split(
 )
 
 import joblib
-model = joblib.load(os.path.join(os.environ["ANALYSIS_DIR"], "models", "forecast_model.pkl"))
+model = joblib.load(os.path.join(os.environ["ANALYSIS_DIR"], "models", f"forecast_{json.load(open(os.path.join(os.environ['ANALYSIS_DIR'], 'metadata.json')))['model_version']}.pkl"))
 
 prediction = model.predict(x_test)
 
@@ -50,7 +57,6 @@ print("MAE :", mae)
 print("MSE :", mse)
 print("r2 score :", r2)
 
-import json
 
 
 metrics = {}

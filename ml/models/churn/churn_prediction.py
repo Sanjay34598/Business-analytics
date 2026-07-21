@@ -1,9 +1,16 @@
 import os
+analysis_dir = os.environ.get("ANALYSIS_DIR", "")
+if analysis_dir:
+    for sub in ["dataset", "processed", "models", "reports", "reports/charts", "logs"]:
+        os.makedirs(os.path.join(analysis_dir, sub), exist_ok=True)
+
+import json
+import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 
-sales = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "processed", "sales_processed.csv"))
+sales = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "processed", "sales.csv"))
 
 sales["Churn"] = (
 	sales["Profit"]<0
@@ -44,12 +51,12 @@ result["Prediction"] = prediction
 print(result.head())
 
 result.to_csv(
-	os.path.join(os.environ["ANALYSIS_DIR"], "processed", "churn_prediction.csv"),
+	os.path.join(os.environ["ANALYSIS_DIR"], "processed", "customers.csv"),
     index = False
 )
 
 import joblib
 
-joblib.dump(model, os.path.join(os.environ["ANALYSIS_DIR"], "models", "churn_model.pkl"))
+joblib.dump(model, os.path.join(os.environ["ANALYSIS_DIR"], "models", f"churn_{json.load(open(os.path.join(os.environ['ANALYSIS_DIR'], 'metadata.json')))['model_version']}.pkl"))
 
 print(" Prediction Completed Succesfully")

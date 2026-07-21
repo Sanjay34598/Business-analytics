@@ -1,17 +1,30 @@
 import { getApiData } from "./api";
 
-export const getSales = (analysisId) => getApiData(analysisId ? `/sales?analysis_id=${analysisId}` : "/sales");
-export const getForecast = (analysisId) => getApiData(analysisId ? `/forecast?analysis_id=${analysisId}` : "/forecast");
-export const getChurn = (analysisId) => getApiData(analysisId ? `/churn?analysis_id=${analysisId}` : "/churn");
-export const getRecommendations = (analysisId) => getApiData(analysisId ? `/recommendation?analysis_id=${analysisId}` : "/recommendation");
-export const getMetrics = (analysisId) => getApiData(analysisId ? `/reports/metrics?analysis_id=${analysisId}` : "/reports/metrics");
+export const getDashboardData = (analysisId) => 
+  getApiData(analysisId ? `/api/dashboard?analysis_id=${analysisId}` : "/api/dashboard");
+
+export const getSales = (analysisId) => 
+  getApiData(analysisId ? `/api/sales?analysis_id=${analysisId}` : "/api/sales");
+
+export const getForecast = (analysisId) => 
+  getApiData(analysisId ? `/api/forecast?analysis_id=${analysisId}` : "/api/forecast");
+
+export const getChurn = (analysisId) => 
+  getApiData(analysisId ? `/api/churn?analysis_id=${analysisId}` : "/api/churn");
+
+export const getRecommendations = (analysisId) => 
+  getApiData(analysisId ? `/api/recommendation?analysis_id=${analysisId}` : "/api/recommendation");
+
+export const getMetrics = (analysisId) => 
+  getApiData(analysisId ? `/api/report?analysis_id=${analysisId}` : "/api/report");
 
 export const retrainDataset = async (datasetId) => {
     const response = await fetch(`http://localhost:5000/datasets/${datasetId}/retrain`, {
         method: "POST"
     });
     if (!response.ok) {
-        throw new Error("Retraining failed");
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.message || "Retraining failed");
     }
     return response.json();
 };

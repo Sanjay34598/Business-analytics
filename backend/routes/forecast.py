@@ -3,6 +3,7 @@ import services.load_data as ld
 
 forecast_bp = Blueprint("forecast", __name__)
 
+@forecast_bp.route("/api/forecast")
 @forecast_bp.route("/forecast")
 def get_forecast():
     analysis_id = request.args.get('analysis_id')

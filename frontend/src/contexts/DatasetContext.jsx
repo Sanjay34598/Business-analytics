@@ -61,11 +61,17 @@ export const DatasetProvider = ({ children }) => {
   };
 
   const activateDataset = async (id) => {
-    const targetDataset = datasets.find(d => d.id === id);
+    const targetDataset = datasets.find(d => (d.analysis_id === id || d.id === id));
     if (!targetDataset || targetDataset.status !== "Completed") {
       throw new Error("Dataset is not ready to be activated");
     }
     
+    try {
+      await fetch(`/datasets/${id}/active`, { method: "PUT" });
+    } catch (e) {
+      console.error("Failed to sync active dataset to backend config:", e);
+    }
+
     localStorage.setItem("activeDatasetId", id);
     setActiveDataset(targetDataset);
   };

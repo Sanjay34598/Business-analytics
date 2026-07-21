@@ -1,8 +1,14 @@
 import os
+analysis_dir = os.environ.get("ANALYSIS_DIR", "")
+if analysis_dir:
+    for sub in ["dataset", "processed", "models", "reports", "reports/charts", "logs"]:
+        os.makedirs(os.path.join(analysis_dir, sub), exist_ok=True)
+
+import os
 import pandas as pd
 import numpy as np
 
-file_path = os.path.join(os.environ["ANALYSIS_DIR"], "uploaded.csv")
+file_path = os.path.join(os.environ["ANALYSIS_DIR"], "dataset", "uploaded.csv")
 sales = pd.read_csv(file_path)
 
 # Fix incorrect CSV schema

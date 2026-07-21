@@ -1,4 +1,11 @@
 import os
+analysis_dir = os.environ.get("ANALYSIS_DIR", "")
+if analysis_dir:
+    for sub in ["dataset", "processed", "models", "reports", "reports/charts", "logs"]:
+        os.makedirs(os.path.join(analysis_dir, sub), exist_ok=True)
+
+import json
+import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
@@ -10,7 +17,7 @@ from sklearn.metrics import(
 	confusion_matrix
 )
 
-sales = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "processed", "sales_processed.csv"))
+sales = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "processed", "sales.csv"))
 
 sales["Churn"] = (
 	sales["Profit"]<0
@@ -37,7 +44,7 @@ x_train,x_test,y_train,y_test = train_test_split(
 )
 
 import joblib
-model = joblib.load(os.path.join(os.environ["ANALYSIS_DIR"], "models", "churn_model.pkl"))
+model = joblib.load(os.path.join(os.environ["ANALYSIS_DIR"], "models", f"churn_{json.load(open(os.path.join(os.environ['ANALYSIS_DIR'], 'metadata.json')))['model_version']}.pkl"))
 
 prediction = model.predict(
 	x_test
@@ -60,7 +67,6 @@ print("F1 Score :", f1)
 print("Confusion Matrix")
 print(cm)
 
-import json
 
 
 metrics = {}

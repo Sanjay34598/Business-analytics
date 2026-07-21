@@ -1,22 +1,15 @@
 [
     {
-        "id": "analysis_c61376e0",
-        "name": "sales_data.csv",
+        "analysis_id": "analysis_001",
+        "id": "analysis_001",
+        "dataset_name": "dataset_a.csv",
+        "name": "dataset_a.csv",
+        "created_at": "Jul 21, 2026, 09:59 PM",
+        "uploadDate": "Jul 21, 2026, 09:59 PM",
+        "status": "Processing...",
         "rows": 5000,
         "columns": 18,
-        "size": "0.82 MB",
-        "uploadDate": "Jul 21, 2026, 09:18 PM",
-        "trainingDate": "Not Trained",
-        "status": "Failed"
-    },
-    {
-        "id": "analysis_8132fd93",
-        "name": "sample_sales_data_1000.csv",
-        "rows": 1000,
-        "columns": 18,
-        "size": "0.16 MB",
-        "uploadDate": "Jul 21, 2026, 09:23 PM",
-        "trainingDate": "Not Trained",
-        "status": "Uploaded"
+        "model_version": "v1",
+        "accuracy": "N/A"
     }
 ]

@@ -9,7 +9,7 @@ import PageHeader from "../components/PageHeader";
 import RecentActivity from "../components/RecentActivity";
 import SalesChart from "../components/SalesChart";
 import StatCard from "../components/StatCard";
-import { getForecast, getSales, getRecommendations, getMetrics, retrainDataset } from "../services/salesapi";
+import { getDashboardData, getForecast, getSales, getRecommendations, getMetrics, retrainDataset } from "../services/salesapi";
 import { useDataset } from "../contexts/DatasetContext";
 import "../styles/Dashboard.css";
 import Layout from "../components/Layout";
@@ -43,26 +43,27 @@ function Dashboard() {
     }
   };
 
+  const [dashboardMeta, setDashboardMeta] = useState(null);
+
   const loadDashboard = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
-      const [salesData, forecastData, recommendationData, metricsData] = await Promise.all([
-        getSales(activeDataset?.id), 
-        getForecast(activeDataset?.id),
-        getRecommendations(activeDataset?.id),
-        getMetrics(activeDataset?.id)
-      ]);
-      setSales(salesData);
-      setForecast(forecastData);
-      setRecommendations(recommendationData);
-      setModelMetrics(metricsData);
+      const data = await getDashboardData(activeDataset?.id);
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      setSales(data.sales || []);
+      setForecast(data.forecast || []);
+      setRecommendations(data.recommendations || []);
+      setModelMetrics(data.report || {});
+      setDashboardMeta(data.analysis || {});
     } catch (requestError) {
       setError(requestError.message || "Unable to load dashboard data.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [activeDataset?.id]);
 
   useEffect(() => {
     loadDashboard();

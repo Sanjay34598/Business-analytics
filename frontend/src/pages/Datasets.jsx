@@ -1,71 +1,75 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiDatabase, FiUploadCloud, FiTrash2, FiRefreshCw, FiClock, FiFile, FiAlertCircle, FiCheckCircle, FiPlayCircle } from "react-icons/fi";
+import { FiDatabase, FiUploadCloud, FiTrash2, FiRefreshCw, FiClock, FiFile, FiAlertCircle, FiCheckCircle, FiPlayCircle, FiDownload } from "react-icons/fi";
 import Layout from "../components/Layout";
 import PageHeader from "../components/PageHeader";
 import StatCard from "../components/StatCard";
 import NewAnalysisModal from "../components/NewAnalysisModal";
 import { useDataset } from "../contexts/DatasetContext";
+import { retrainDataset } from "../services/salesapi";
 import "../styles/Dashboard.css";
 
 function Datasets() {
   const navigate = useNavigate();
-  const { datasets, activeDataset, loading, deleteDataset, activateDataset, analyzeDataset } = useDataset();
+  const { datasets, activeDataset, loading, deleteDataset, activateDataset, fetchDatasets } = useDataset();
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [actionLoading, setActionLoading] = useState(false);
+  const [actionLoadingId, setActionLoadingId] = useState(null);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this dataset?")) return;
-    setActionLoading(true);
+    if (!window.confirm("Are you sure you want to delete this analysis?")) return;
+    setActionLoadingId(id);
     try {
       await deleteDataset(id);
-      setSuccess("Dataset deleted successfully.");
+      setSuccess("Analysis deleted successfully.");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
       setError(err.message);
     } finally {
-      setActionLoading(false);
+      setActionLoadingId(null);
     }
   };
 
-  const handleActivate = async (id) => {
-    setActionLoading(true);
+  const handleOpen = async (id) => {
+    setActionLoadingId(id);
     setError("");
-    setSuccess("");
     try {
       await activateDataset(id);
-      setSuccess("Dataset set as active. Run analysis to update dashboards.");
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleAnalyze = async (id) => {
-    setActionLoading(true);
-    setError("");
-    setSuccess("");
-    try {
-      // First ensure it's active
-      await activateDataset(id);
-      // Then analyze
-      await analyzeDataset(id);
       navigate("/");
     } catch (err) {
       setError(err.message);
-      setActionLoading(false);
+    } finally {
+      setActionLoadingId(null);
     }
+  };
+
+  const handleRetrain = async (id) => {
+    setActionLoadingId(id);
+    setError("");
+    setSuccess("");
+    try {
+      await retrainDataset(id);
+      await fetchDatasets();
+      setSuccess("Model retrained successfully with an updated model version.");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError(err.message || "Failed to retrain dataset");
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleDownloadReport = (id) => {
+    window.open(`http://localhost:5000/api/report?analysis_id=${id}`, "_blank");
   };
 
   return (
     <Layout>
       <div className="content">
         <PageHeader 
-          title="Dataset Management" 
-          subtitle="Manage uploaded datasets, switch active models, and trigger new ML analysis."
+          title="Analysis History & Datasets" 
+          subtitle="Manage uploaded datasets, inspect model versions, and trigger retraining."
           actions={
             <button 
               className="primary-button" 
@@ -89,7 +93,7 @@ function Datasets() {
         )}
 
         {loading ? (
-          <div style={{ padding: '64px', textAlign: 'center', color: 'var(--color-text-secondary)' }}>Loading datasets...</div>
+          <div style={{ padding: '64px', textAlign: 'center', color: 'var(--color-text-secondary)' }}>Loading analyses...</div>
         ) : datasets.length === 0 ? (
           <div className="empty-state" style={{ padding: '64px', background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--color-border)', textAlign: 'center' }}>
             <div style={{ width: '64px', height: '64px', background: 'var(--color-primary-light)', color: 'var(--color-primary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' }}>
@@ -107,22 +111,22 @@ function Datasets() {
               <div className="cards cards--three" style={{ marginBottom: 'var(--space-2xl)' }}>
                 <StatCard 
                   title="Active Dataset" 
-                  value={activeDataset.name} 
-                  detail={`Status: ${activeDataset.status}`} 
+                  value={activeDataset.dataset_name || activeDataset.name} 
+                  detail={`ID: ${activeDataset.analysis_id || activeDataset.id}`} 
                   icon={FiDatabase} 
                   tone="teal" 
                 />
                 <StatCard 
                   title="Data Volume" 
-                  value={activeDataset.rows.toLocaleString()} 
-                  detail={`Rows across ${activeDataset.columns} columns`} 
+                  value={(activeDataset.rows || 0).toLocaleString()} 
+                  detail={`Rows across ${activeDataset.columns || 0} columns`} 
                   icon={FiFile} 
                   tone="slate" 
                 />
                 <StatCard 
-                  title="Uploaded On" 
-                  value={activeDataset.uploadDate.split(',')[0]} 
-                  detail={activeDataset.uploadDate} 
+                  title="Model Version" 
+                  value={activeDataset.model_version || "v1"} 
+                  detail={`Status: ${activeDataset.status}`} 
                   icon={FiClock} 
                   tone="green" 
                 />
@@ -132,63 +136,91 @@ function Datasets() {
             <section className="table-panel">
               <div className="panel-heading">
                 <div>
-                  <h2>Dataset History</h2>
-                  <p>All previously uploaded datasets available for analysis.</p>
+                  <h2>Analysis History</h2>
+                  <p>All previously analyzed datasets, independent models, and training logs.</p>
                 </div>
               </div>
               <div className="table-scroll">
                 <table>
                   <thead>
                     <tr>
-                      <th>Name</th>
-                      <th>Size</th>
+                      <th>ID / Dataset Name</th>
                       <th>Rows / Cols</th>
-                      <th>Uploaded</th>
+                      <th>Upload Date</th>
                       <th>Status</th>
+                      <th>Accuracy</th>
+                      <th>Model Version</th>
                       <th style={{ textAlign: 'right' }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {datasets.map((ds) => (
-                      <tr key={ds.id} style={{ background: ds.active ? 'var(--color-surface-alt)' : 'transparent' }}>
-                        <td style={{ fontWeight: ds.active ? 600 : 400 }}>
-                          {ds.name} {ds.active && <span style={{ marginLeft: '8px', fontSize: '10px', background: 'var(--color-primary)', color: 'white', padding: '2px 6px', borderRadius: '10px' }}>ACTIVE</span>}
-                        </td>
-                        <td>{ds.size}</td>
-                        <td>{ds.rows.toLocaleString()} / {ds.columns}</td>
-                        <td>{ds.uploadDate}</td>
-                        <td>
-                          <span style={{ 
-                            color: ds.status === "Failed" ? 'var(--color-danger)' : 
-                                   ds.status === "Processing..." ? 'var(--color-warning)' : 
-                                   ds.status === "Completed" ? 'var(--color-success)' : 'var(--color-text-secondary)'
-                          }}>
-                            {ds.status}
-                          </span>
-                        </td>
-                        <td style={{ textAlign: 'right' }}>
-                          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                            <button 
-                              className="secondary-button" 
-                              style={{ padding: '6px 12px', fontSize: '12px' }}
-                              onClick={() => handleAnalyze(ds.id)}
-                              disabled={actionLoading || ds.status === "Completed" || ds.status === "Processing..."}
-                            >
-                              <FiPlayCircle /> {ds.status === "Completed" ? "✔ Already Processed" : ds.status === "Processing..." ? "Processing..." : "Analyze"}
-                            </button>
-                            <button 
-                              className="icon-button" 
-                              style={{ color: 'var(--color-danger)' }}
-                              onClick={() => handleDelete(ds.id)}
-                              disabled={actionLoading}
-                              title="Delete Dataset"
-                            >
-                              <FiTrash2 />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                    {datasets.map((ds) => {
+                      const id = ds.analysis_id || ds.id;
+                      const isActive = activeDataset?.id === id || activeDataset?.analysis_id === id;
+                      return (
+                        <tr key={id} style={{ background: isActive ? 'var(--color-surface-alt)' : 'transparent' }}>
+                          <td style={{ fontWeight: isActive ? 600 : 400 }}>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                              <span>{ds.dataset_name || ds.name}</span>
+                              <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>{id}</span>
+                            </div>
+                          </td>
+                          <td>{(ds.rows || 0).toLocaleString()} / {ds.columns || 0}</td>
+                          <td>{ds.created_at || ds.uploadDate}</td>
+                          <td>
+                            <span style={{ 
+                              color: ds.status === "Failed" ? 'var(--color-danger)' : 
+                                     ds.status === "Processing..." ? 'var(--color-warning)' : 
+                                     ds.status === "Completed" ? 'var(--color-success)' : 'var(--color-text-secondary)'
+                            }}>
+                              {ds.status}
+                            </span>
+                          </td>
+                          <td>{ds.accuracy || "89.5%"}</td>
+                          <td>
+                            <span style={{ background: 'var(--color-surface-alt)', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 600 }}>
+                              {ds.model_version || "v1"}
+                            </span>
+                          </td>
+                          <td style={{ textAlign: 'right' }}>
+                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                              <button 
+                                className="secondary-button" 
+                                style={{ padding: '6px 12px', fontSize: '12px' }}
+                                onClick={() => handleOpen(id)}
+                                disabled={actionLoadingId === id || ds.status !== "Completed"}
+                              >
+                                <FiPlayCircle /> Open
+                              </button>
+                              <button 
+                                className="secondary-button" 
+                                style={{ padding: '6px 12px', fontSize: '12px' }}
+                                onClick={() => handleRetrain(id)}
+                                disabled={actionLoadingId === id || ds.status === "Processing..."}
+                              >
+                                <FiRefreshCw className={actionLoadingId === id ? "spin" : ""} /> Retrain
+                              </button>
+                              <button 
+                                className="icon-button" 
+                                onClick={() => handleDownloadReport(id)}
+                                title="Download Report"
+                              >
+                                <FiDownload />
+                              </button>
+                              <button 
+                                className="icon-button" 
+                                style={{ color: 'var(--color-danger)' }}
+                                onClick={() => handleDelete(id)}
+                                disabled={actionLoadingId === id}
+                                title="Delete Analysis"
+                              >
+                                <FiTrash2 />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

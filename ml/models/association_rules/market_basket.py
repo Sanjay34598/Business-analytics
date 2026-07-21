@@ -1,8 +1,14 @@
 import os
+analysis_dir = os.environ.get("ANALYSIS_DIR", "")
+if analysis_dir:
+    for sub in ["dataset", "processed", "models", "reports", "reports/charts", "logs"]:
+        os.makedirs(os.path.join(analysis_dir, sub), exist_ok=True)
+
+import os
 import pandas as pd
 from mlxtend.frequent_patterns import apriori, association_rules
 
-sales = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "processed", "sales_processed.csv"))
+sales = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "processed", "sales.csv"))
 
 basket = pd.get_dummies(sales["Product_Category"])
 
