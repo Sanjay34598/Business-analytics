@@ -17,7 +17,7 @@
         "size": "0.2 MB",
         "uploadDate": "Jul 21, 2026, 07:46 PM",
         "status": "Completed",
-        "active": false
+        "active": true
     },
     {
         "id": "56fab5a0-70d8-4f34-a787-0a6623304392",
@@ -27,7 +27,7 @@
         "size": "0.82 MB",
         "uploadDate": "Jul 21, 2026, 07:56 PM",
         "status": "Completed",
-        "active": true
+        "active": false
     },
     {
         "id": "c74ee34c-ac3b-4c79-84d9-ea159e479c1d",
@@ -36,7 +36,7 @@
         "columns": 23,
         "size": "0.1 MB",
         "uploadDate": "Jul 21, 2026, 08:14 PM",
-        "status": "Uploaded",
+        "status": "Processing...",
         "active": false
     }
 ]
