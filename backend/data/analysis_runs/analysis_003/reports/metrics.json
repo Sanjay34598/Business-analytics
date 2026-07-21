@@ -1,0 +1,29 @@
+{
+    "forecast": {
+        "MAE": 346.0362699280672,
+        "MSE": 224460.88718581395,
+        "R2": 0.9682373557110245
+    },
+    "churn": {
+        "Accuracy": 1.0,
+        "Precision": 1.0,
+        "Recall": 1.0,
+        "F1": 1.0,
+        "Confusion_Matrix": [
+            [
+                27,
+                0
+            ],
+            [
+                0,
+                173
+            ]
+        ]
+    },
+    "recommendation": {
+        "Precision_at_K": 0.85,
+        "Recall_at_K": 0.75,
+        "Coverage": 1.0,
+        "Total_Categories": 3
+    }
+}

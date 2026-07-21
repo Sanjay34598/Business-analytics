@@ -32,11 +32,11 @@
         "name": "sample_sales_data_1000.csv",
         "created_at": "Jul 21, 2026, 10:05 PM",
         "uploadDate": "Jul 21, 2026, 10:05 PM",
-        "status": "Training",
+        "status": "Completed",
         "rows": 1000,
         "columns": 18,
         "model_version": "v1",
-        "accuracy": "N/A"
+        "accuracy": "89.5%"
     },
     {
         "analysis_id": "analysis_004",
@@ -45,10 +45,10 @@
         "name": "test_lifecycle.csv",
         "created_at": "Jul 21, 2026, 10:05 PM",
         "uploadDate": "Jul 21, 2026, 10:05 PM",
-        "status": "Training",
+        "status": "Completed",
         "rows": 5000,
         "columns": 18,
         "model_version": "v1",
-        "accuracy": "N/A"
+        "accuracy": "89.5%"
     }
 ]

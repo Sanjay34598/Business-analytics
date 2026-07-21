@@ -146,7 +146,7 @@ function DatasetSwitcher() {
                       style={{
                         padding: "16px",
                         borderBottom: "1px solid var(--color-border)",
-                        cursor: loadingId === ds.id ? "wait" : "pointer",
+                        cursor: "pointer",
                         background: activeDataset?.id === ds.id ? "var(--color-primary-light)" : "transparent",
                         display: "flex",
                         alignItems: "flex-start",
@@ -175,9 +175,7 @@ function DatasetSwitcher() {
                           <span>{ds.uploadDate.split(',')[0]}</span>
                         </div>
                       </div>
-                      {loadingId === ds.id ? (
-                        <div className="spinner" style={{ width: "20px", height: "20px", borderTopColor: "var(--color-primary)" }} />
-                      ) : activeDataset?.id === ds.id ? (
+                      {activeDataset?.id === ds.id ? (
                         <FiCheck size={20} style={{ color: "var(--color-primary)" }} />
                       ) : null}
                     </li>
