@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from sklearn.model_selection  import train_test_split
 from sklearn.linear_model import LinearRegression
@@ -49,7 +50,6 @@ print("MAE :", mae)
 print("MSE :", mse)
 print("r2 score :", r2)
 
-import os
 import json
 
 

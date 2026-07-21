@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 sales = pd.read_csv(os.path.join(os.environ["ANALYSIS_DIR"], "processed", "sales_processed.csv"))
 
@@ -24,7 +25,6 @@ recommend.to_csv(
 	os.path.join(os.environ["ANALYSIS_DIR"], "processed", "product_recommend.csv")
 )
 
-import os
 import joblib
 
 joblib.dump(recommend, os.path.join(os.environ["ANALYSIS_DIR"], "models", "recommendation_model.pkl"))

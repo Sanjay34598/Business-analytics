@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
@@ -47,7 +48,6 @@ result.to_csv(
     index = False
 )
 
-import os
 import joblib
 
 joblib.dump(model, os.path.join(os.environ["ANALYSIS_DIR"], "models", "churn_model.pkl"))

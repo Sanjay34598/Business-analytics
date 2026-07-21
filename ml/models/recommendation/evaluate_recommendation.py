@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 
 import joblib
@@ -13,7 +14,6 @@ print(recommend.iloc[0])
 print("loweset profit category ")
 print(recommend.iloc[-1])
 
-import os
 import json
 
 metrics = {}
