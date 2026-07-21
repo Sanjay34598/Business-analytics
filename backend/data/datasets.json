@@ -6,7 +6,7 @@
         "columns": 18,
         "size": "0.16 MB",
         "uploadDate": "Jul 21, 2026, 07:27 PM",
-        "status": "Processed & Active",
+        "status": "Completed",
         "active": false
     },
     {
@@ -16,6 +16,16 @@
         "columns": 23,
         "size": "0.2 MB",
         "uploadDate": "Jul 21, 2026, 07:46 PM",
+        "status": "Completed",
+        "active": false
+    },
+    {
+        "id": "56fab5a0-70d8-4f34-a787-0a6623304392",
+        "name": "sample_sales_data_5000.csv",
+        "rows": 5000,
+        "columns": 18,
+        "size": "0.82 MB",
+        "uploadDate": "Jul 21, 2026, 07:56 PM",
         "status": "Completed",
         "active": true
     }
