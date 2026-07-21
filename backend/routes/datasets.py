@@ -39,8 +39,7 @@ def retrain_dataset(dataset_id):
         # First activate it to ensure raw data is correctly positioned
         set_active_dataset(dataset_id)
         
-        
-        return jsonify({"success": True, "message": "Dataset retrained successfully"}), 200
+        return analyze_dataset_core(dataset_id)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
         
@@ -67,7 +66,6 @@ def remove_dataset(dataset_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@datasets_bp.route("/datasets/analyze", methods=["POST"])
 def analyze_dataset_core(dataset_id):
     if dataset_id:
         update_dataset_status(dataset_id, "Processing...")
@@ -245,3 +243,9 @@ def analyze_dataset_core(dataset_id):
             "message": str(e),
             "traceback": traceback.format_exc()
         }), 500
+
+@datasets_bp.route("/datasets/analyze", methods=["POST"])
+def analyze_dataset():
+    data = request.json or {}
+    dataset_id = data.get("dataset_id")
+    return analyze_dataset_core(dataset_id)

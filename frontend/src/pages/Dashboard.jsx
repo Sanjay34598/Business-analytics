@@ -9,7 +9,7 @@ import PageHeader from "../components/PageHeader";
 import RecentActivity from "../components/RecentActivity";
 import SalesChart from "../components/SalesChart";
 import StatCard from "../components/StatCard";
-import { getForecast, getSales, getRecommendations, getMetrics } from "../services/salesapi";
+import { getForecast, getSales, getRecommendations, getMetrics, retrainDataset } from "../services/salesapi";
 import { useDataset } from "../contexts/DatasetContext";
 import "../styles/Dashboard.css";
 import Layout from "../components/Layout";

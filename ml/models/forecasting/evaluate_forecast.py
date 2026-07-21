@@ -13,8 +13,13 @@ x = sales[
 	[
 		"Quantity_Sold",
 		"Unit_Price",
+		"Profit",
 		"Discount",
-		"Profit"
+		"Month",
+		"Region",
+		"Product_Category",
+		"Sales_Channel",
+		"Customer_Type"
 	]
 ]
 
