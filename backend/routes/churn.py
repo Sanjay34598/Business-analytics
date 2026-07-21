@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from services.load_data import churn
+import services.load_data as ld
 
 churn_bp = Blueprint("churn", __name__)
 
@@ -7,5 +7,5 @@ churn_bp = Blueprint("churn", __name__)
 def get_churn():
 
     return jsonify(
-        churn.to_dict(orient="records")
+        ld.churn.to_dict(orient="records")
     )

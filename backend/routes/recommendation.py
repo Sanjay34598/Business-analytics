@@ -1,11 +1,11 @@
 from flask import Blueprint, jsonify
-from services.load_data import recommendation
+import services.load_data as ld
 
-recommend_bp = Blueprint("recommend", __name__)
+recommendation_bp = Blueprint("recommendation", __name__)
 
-@recommend_bp.route("/recommendation")
+@recommendation_bp.route("/recommendation")
 def get_recommendation():
 
     return jsonify(
-        recommendation.to_dict(orient="records")
+        ld.recommendation.to_dict(orient="records")
     )

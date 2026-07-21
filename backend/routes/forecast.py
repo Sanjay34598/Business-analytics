@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from services.load_data import forecast
+import services.load_data as ld
 
 forecast_bp = Blueprint("forecast", __name__)
 
@@ -7,5 +7,5 @@ forecast_bp = Blueprint("forecast", __name__)
 def get_forecast():
 
     return jsonify(
-        forecast.to_dict(orient="records")
+        ld.forecast.to_dict(orient="records")
     )
