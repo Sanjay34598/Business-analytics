@@ -33,6 +33,17 @@ def upload_dataset():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@datasets_bp.route("/datasets/<dataset_id>/retrain", methods=["POST"])
+def retrain_dataset(dataset_id):
+    try:
+        # First activate it to ensure raw data is correctly positioned
+        set_active_dataset(dataset_id)
+        
+        
+        return jsonify({"success": True, "message": "Dataset retrained successfully"}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+        
 @datasets_bp.route("/datasets/<dataset_id>/active", methods=["PUT"])
 def activate_dataset(dataset_id):
     try:
@@ -57,10 +68,7 @@ def remove_dataset(dataset_id):
         return jsonify({"error": str(e)}), 500
 
 @datasets_bp.route("/datasets/analyze", methods=["POST"])
-def analyze_dataset():
-    data = request.json or {}
-    dataset_id = data.get("dataset_id")
-    
+def analyze_dataset_core(dataset_id):
     if dataset_id:
         update_dataset_status(dataset_id, "Processing...")
         
@@ -77,11 +85,16 @@ def analyze_dataset():
         print(f"Uploaded dataset path: {uploaded_path}")
         print(f"Pipeline input path: {pipeline_input_path}")
         
+        env = os.environ.copy()
+        if dataset_id:
+            env["DATASET_ID"] = dataset_id
+
         result = subprocess.run(
             ["python", "ml/pipeline/run_pipeline.py"],
             cwd=project_root,
             capture_output=True,
-            text=True
+            text=True,
+            env=env
         )
         
         if result.returncode != 0:
@@ -146,12 +159,33 @@ def analyze_dataset():
                     "exit_code": 1
                 }), 500
                 
-        # Backup processed files for dataset switching
+        # Backup processed files, models, and reports for dataset switching
         import shutil
-        dataset_processed_dir = os.path.join(project_root, "backend", "data", "processed", dataset_id)
-        os.makedirs(dataset_processed_dir, exist_ok=True)
+        dataset_runs_dir = os.path.join(project_root, "backend", "data", "analysis_runs", dataset_id)
+        dataset_data_dir = os.path.join(dataset_runs_dir, "data")
+        dataset_models_dir = os.path.join(dataset_runs_dir, "models")
+        dataset_reports_dir = os.path.join(dataset_runs_dir, "reports")
+        
+        os.makedirs(dataset_data_dir, exist_ok=True)
+        os.makedirs(dataset_models_dir, exist_ok=True)
+        os.makedirs(dataset_reports_dir, exist_ok=True)
+        
+        # Backup data
         for f in required_files:
-            shutil.copy2(os.path.join(processed_dir, f), os.path.join(dataset_processed_dir, f))
+            shutil.copy2(os.path.join(processed_dir, f), os.path.join(dataset_data_dir, f))
+            
+        # Backup models
+        models_dir = os.path.join(project_root, "ml", "data", "models")
+        if os.path.exists(models_dir):
+            for f in os.listdir(models_dir):
+                if f.endswith(".pkl"):
+                    shutil.copy2(os.path.join(models_dir, f), os.path.join(dataset_models_dir, f))
+                    
+        # Backup reports
+        reports_dir = os.path.join(project_root, "ml", "data", "reports")
+        if os.path.exists(reports_dir):
+            for f in os.listdir(reports_dir):
+                shutil.copy2(os.path.join(reports_dir, f), os.path.join(dataset_reports_dir, f))
                 
         # Reload data
         reload_data()
@@ -203,13 +237,11 @@ def analyze_dataset():
     except Exception as e:
         if dataset_id:
             update_dataset_status(dataset_id, "Failed")
+        import traceback
         return jsonify({
             "success": False,
             "failed_stage": "Backend/Flask",
             "exception": type(e).__name__,
             "message": str(e),
-            "stdout": "",
-            "stderr": "",
-            "traceback": "",
-            "exit_code": 500
+            "traceback": traceback.format_exc()
         }), 500

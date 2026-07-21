@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Doughnut } from "react-chartjs-2";
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
-import { FiActivity, FiBox, FiDollarSign, FiPercent, FiShoppingBag, FiTrendingUp, FiDatabase, FiClock, FiCheckCircle } from "react-icons/fi";
+import { FiActivity, FiBox, FiDollarSign, FiPercent, FiShoppingBag, FiTrendingUp, FiDatabase, FiClock, FiCheckCircle, FiRefreshCw } from "react-icons/fi";
 import ForecastChart from "../components/ForecastChart";
 import Loader from "../components/Loader";
 import ErrorState from "../components/ErrorState";
@@ -9,7 +9,7 @@ import PageHeader from "../components/PageHeader";
 import RecentActivity from "../components/RecentActivity";
 import SalesChart from "../components/SalesChart";
 import StatCard from "../components/StatCard";
-import { getForecast, getSales, getRecommendations } from "../services/salesapi";
+import { getForecast, getSales, getRecommendations, getMetrics } from "../services/salesapi";
 import { useDataset } from "../contexts/DatasetContext";
 import "../styles/Dashboard.css";
 import Layout from "../components/Layout";
@@ -25,21 +25,38 @@ function Dashboard() {
   const [sales, setSales] = useState([]);
   const [forecast, setForecast] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
+  const [modelMetrics, setModelMetrics] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [retraining, setRetraining] = useState(false);
+
+  const handleRetrain = async () => {
+    if (!activeDataset?.id) return;
+    setRetraining(true);
+    try {
+      await retrainDataset(activeDataset.id);
+      await loadDashboard();
+    } catch (err) {
+      alert("Failed to retrain: " + err.message);
+    } finally {
+      setRetraining(false);
+    }
+  };
 
   const loadDashboard = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
-      const [salesData, forecastData, recommendationData] = await Promise.all([
+      const [salesData, forecastData, recommendationData, metricsData] = await Promise.all([
         getSales(), 
         getForecast(),
-        getRecommendations()
+        getRecommendations(),
+        getMetrics()
       ]);
       setSales(salesData);
       setForecast(forecastData);
       setRecommendations(recommendationData);
+      setModelMetrics(metricsData);
     } catch (requestError) {
       setError(requestError.message || "Unable to load dashboard data.");
     } finally {
@@ -100,7 +117,37 @@ return (
           title="Business Overview" 
           subtitle="A consolidated view of sales performance and analytical model output." 
         />
-        <DatasetSwitcher />
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          {activeDataset?.id && (
+            <button 
+              onClick={handleRetrain}
+              disabled={retraining}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "8px 16px",
+                background: retraining ? "var(--color-surface-alt)" : "var(--primary-color)",
+                border: "1px solid transparent",
+                borderRadius: "var(--radius-md)",
+                cursor: retraining ? "not-allowed" : "pointer",
+                fontWeight: 500,
+                fontSize: "14px",
+                color: "white",
+                boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                transition: "background 0.2s"
+              }}
+            >
+              {retraining ? (
+                <div className="spinner" style={{ width: "16px", height: "16px", borderTopColor: "white" }} />
+              ) : (
+                <FiRefreshCw size={16} />
+              )}
+              {retraining ? "Retraining..." : "Retrain Model"}
+            </button>
+          )}
+          <DatasetSwitcher />
+        </div>
       </div>
 
       {loading ? (
@@ -113,6 +160,40 @@ return (
         />
       ) : (
         <div key={activeDataset?.id}>
+          {modelMetrics && (
+            <div style={{
+              background: 'var(--surface-color)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-lg)',
+              padding: 'var(--space-md) var(--space-lg)',
+              marginBottom: 'var(--space-lg)',
+              display: 'flex',
+              gap: 'var(--space-xl)',
+              alignItems: 'center'
+            }}>
+              <div>
+                <div style={{fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em'}}>Model Version</div>
+                <div style={{fontWeight: 600}}>v1.0.0</div>
+              </div>
+              <div>
+                <div style={{fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em'}}>Training Date</div>
+                <div style={{fontWeight: 600}}>{modelMetrics.training_date || "Unknown"}</div>
+              </div>
+              <div>
+                <div style={{fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em'}}>Forecast R²</div>
+                <div style={{fontWeight: 600}}>{modelMetrics.forecast?.R2 ? (modelMetrics.forecast.R2 * 100).toFixed(1) + "%" : "N/A"}</div>
+              </div>
+              <div>
+                <div style={{fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em'}}>Churn Accuracy</div>
+                <div style={{fontWeight: 600}}>{modelMetrics.churn?.Accuracy ? (modelMetrics.churn.Accuracy * 100).toFixed(1) + "%" : "N/A"}</div>
+              </div>
+              <div>
+                <div style={{fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em'}}>Model Status</div>
+                <div style={{fontWeight: 600, color: 'var(--primary-color)'}}>Active</div>
+              </div>
+            </div>
+          )}
+
           <div className="cards">
                     <StatCard 
                       title="Total Sales" 
