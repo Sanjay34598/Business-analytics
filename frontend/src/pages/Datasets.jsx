@@ -11,7 +11,7 @@ import "../styles/Dashboard.css";
 
 function Datasets() {
   const navigate = useNavigate();
-  const { datasets, activeDataset, loading, deleteDataset, activateDataset, fetchDatasets } = useDataset();
+  const { datasets, activeDataset, loading, deleteDataset, selectDataset, fetchDatasets } = useDataset();
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -31,11 +31,11 @@ function Datasets() {
     }
   };
 
-  const handleOpen = async (id) => {
+  const handleOpen = (id) => {
     setActionLoadingId(id);
     setError("");
     try {
-      await activateDataset(id);
+      selectDataset(id);
       navigate("/");
     } catch (err) {
       setError(err.message);
@@ -169,9 +169,11 @@ function Datasets() {
                           <td>{ds.created_at || ds.uploadDate}</td>
                           <td>
                             <span style={{ 
+                              fontWeight: 600,
                               color: ds.status === "Failed" ? 'var(--color-danger)' : 
-                                     ds.status === "Processing..." ? 'var(--color-warning)' : 
-                                     ds.status === "Completed" ? 'var(--color-success)' : 'var(--color-text-secondary)'
+                                     (ds.status === "Training" || ds.status === "Processing...") ? 'var(--color-warning)' : 
+                                     ds.status === "Completed" ? 'var(--color-success)' : 
+                                     ds.status === "Uploaded" ? 'var(--color-primary)' : 'var(--color-text-secondary)'
                             }}>
                               {ds.status}
                             </span>

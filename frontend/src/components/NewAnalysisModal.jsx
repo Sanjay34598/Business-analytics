@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { FiX, FiUploadCloud, FiFileText, FiCheckCircle, FiPlay, FiLoader } from "react-icons/fi";
+import { useState } from "react";
+import { FiX, FiUploadCloud, FiFileText, FiCheckCircle, FiLoader } from "react-icons/fi";
 import Papa from "papaparse";
 import { useDataset } from "../contexts/DatasetContext";
 
@@ -13,7 +13,6 @@ function NewAnalysisModal({ onClose }) {
   const [file, setFile] = useState(null);
   const [previewRows, setPreviewRows] = useState([]);
   const [headers, setHeaders] = useState([]);
-  const [uploadedDataset, setUploadedDataset] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState("");
@@ -44,13 +43,13 @@ function NewAnalysisModal({ onClose }) {
         setIsUploading(true);
         try {
           const ds = await uploadDataset(file);
-          setUploadedDataset(ds);
           setIsUploading(false);
           setCurrentStep(4);
           
           // Auto start processing
           setIsProcessing(true);
           await analyzeDataset(ds.id);
+          selectDataset(ds.id);
           setIsProcessing(false);
           setCurrentStep(5);
         } catch (err) {

@@ -1,0 +1,17 @@
+{
+    "analysis_id": "analysis_003",
+    "dataset_name": "sample_sales_data_1000.csv",
+    "status": "Training",
+    "rows": 1000,
+    "columns": 18,
+    "uploaded_at": "Jul 21, 2026, 10:05 PM",
+    "trained_at": "Not Trained",
+    "forecast_accuracy": "N/A",
+    "churn_accuracy": "N/A",
+    "recommendation_score": "N/A",
+    "algorithm": "Linear Regression / Random Forest",
+    "model_version": "v1",
+    "training_time": "0s",
+    "processing_time": "0s",
+    "last_opened": "2026-07-21 22:05:11"
+}

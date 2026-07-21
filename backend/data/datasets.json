@@ -24,5 +24,31 @@
         "columns": 18,
         "model_version": "v1",
         "accuracy": "89.5%"
+    },
+    {
+        "analysis_id": "analysis_003",
+        "id": "analysis_003",
+        "dataset_name": "sample_sales_data_1000.csv",
+        "name": "sample_sales_data_1000.csv",
+        "created_at": "Jul 21, 2026, 10:05 PM",
+        "uploadDate": "Jul 21, 2026, 10:05 PM",
+        "status": "Training",
+        "rows": 1000,
+        "columns": 18,
+        "model_version": "v1",
+        "accuracy": "N/A"
+    },
+    {
+        "analysis_id": "analysis_004",
+        "id": "analysis_004",
+        "dataset_name": "test_lifecycle.csv",
+        "name": "test_lifecycle.csv",
+        "created_at": "Jul 21, 2026, 10:05 PM",
+        "uploadDate": "Jul 21, 2026, 10:05 PM",
+        "status": "Training",
+        "rows": 5000,
+        "columns": 18,
+        "model_version": "v1",
+        "accuracy": "N/A"
     }
 ]

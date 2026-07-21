@@ -6,7 +6,6 @@ function DatasetSwitcher() {
   const { datasets, activeDataset, selectDataset } = useDataset();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [loadingId, setLoadingId] = useState(null);
 
   const completedDatasets = useMemo(() => {
     let filtered = datasets.filter(d => d.status === "Completed");
