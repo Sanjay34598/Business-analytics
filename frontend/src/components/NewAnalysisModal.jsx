@@ -3,9 +3,12 @@ import { FiX, FiUploadCloud, FiFileText, FiCheckCircle, FiPlay, FiLoader } from 
 import Papa from "papaparse";
 import { useDataset } from "../contexts/DatasetContext";
 
+import { useNavigate } from "react-router-dom";
+
 const steps = ["Choose Dataset", "Preview Data", "Validate", "Upload", "Processing", "Complete"];
 
 function NewAnalysisModal({ onClose }) {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [file, setFile] = useState(null);
   const [previewRows, setPreviewRows] = useState([]);

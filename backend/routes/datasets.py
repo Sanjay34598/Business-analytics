@@ -67,6 +67,15 @@ def analyze_dataset():
         current_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.dirname(os.path.dirname(current_dir))
         
+        # Paths
+        dataset_info = next((d for d in get_datasets() if d["id"] == dataset_id), None)
+        uploaded_path = os.path.join(project_root, "backend", "data", "uploads", f"{dataset_id}.csv") if dataset_info else "Unknown"
+        pipeline_input_path = os.path.join(project_root, "ml", "data", "raw", "sales", "sales_data.csv")
+        
+        print(f"Active dataset ID: {dataset_id}")
+        print(f"Uploaded dataset path: {uploaded_path}")
+        print(f"Pipeline input path: {pipeline_input_path}")
+        
         result = subprocess.run(
             ["python", "ml/pipeline/run_pipeline.py"],
             cwd=project_root,
@@ -76,19 +85,17 @@ def analyze_dataset():
         
         if result.returncode != 0:
             if dataset_id:
-                update_dataset_status(dataset_id, "Error")
+                update_dataset_status(dataset_id, "Failed")
             
             stderr = result.stderr or ""
             stdout = result.stdout or ""
             
-            # Simple heuristic to extract the failed stage
             import re
             failed_stage = "Unknown"
             stage_match = re.findall(r"Failed ([\w/.]+)", stdout + stderr)
             if stage_match:
                 failed_stage = stage_match[-1]
                 
-            # Extract exception
             exception_type = "Exception"
             message = "Pipeline execution failed"
             
@@ -113,16 +120,81 @@ def analyze_dataset():
                 "exit_code": result.returncode
             }), 500
             
+        # Verify files exist and are non-empty
+        processed_dir = os.path.join(project_root, "ml", "data", "processed")
+        required_files = [
+            "sales_processed.csv",
+            "forecast_results.csv",
+            "churn_prediction.csv",
+            "product_recommend.csv"
+        ]
+        
+        for f in required_files:
+            file_path = os.path.join(processed_dir, f)
+            if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
+                if dataset_id:
+                    update_dataset_status(dataset_id, "Failed")
+                return jsonify({
+                    "success": False,
+                    "failed_stage": "File Verification",
+                    "exception": "FileNotFoundError",
+                    "message": f"Required output file is missing or empty: {f}",
+                    "stdout": result.stdout,
+                    "stderr": "",
+                    "traceback": "",
+                    "exit_code": 1
+                }), 500
+                
+        # Reload data
         reload_data()
         
+        import services.load_data as ld
+        sales_len = len(ld.sales) if ld.sales is not None and not ld.sales.empty else 0
+        forecast_len = len(ld.forecast) if ld.forecast is not None and not ld.forecast.empty else 0
+        churn_len = len(ld.churn) if ld.churn is not None and not ld.churn.empty else 0
+        rec_len = len(ld.recommendation) if ld.recommendation is not None and not ld.recommendation.empty else 0
+        
+        print(f"Sales rows: {sales_len}")
+        print(f"Forecast rows: {forecast_len}")
+        print(f"Customer/Churn rows: {churn_len}")
+        print(f"Recommendation rows: {rec_len}")
+        
+        if sales_len == 0 or forecast_len == 0 or churn_len == 0 or rec_len == 0:
+            if dataset_id:
+                update_dataset_status(dataset_id, "Failed")
+            return jsonify({
+                "success": False,
+                "failed_stage": "Data Validation",
+                "exception": "EmptyDataFrameError",
+                "message": "One or more processed datasets returned 0 rows.",
+                "stdout": result.stdout,
+                "stderr": "",
+                "traceback": "",
+                "exit_code": 1
+            }), 500
+
         if dataset_id:
-            update_dataset_status(dataset_id, "Processed & Active")
+            update_dataset_status(dataset_id, "Completed")
             
-        return jsonify({"success": True, "message": "Analysis completed successfully", "output": result.stdout})
+        import datetime
+        return jsonify({
+            "success": True,
+            "dataset": dataset_id,
+            "analysis_completed": True,
+            "dashboard_ready": True,
+            "processed_at": datetime.datetime.now().isoformat(),
+            "metrics": {
+                "sales_records": sales_len,
+                "forecast_records": forecast_len,
+                "customers": churn_len,
+                "recommendations": rec_len
+            },
+            "output": result.stdout
+        })
         
     except Exception as e:
         if dataset_id:
-            update_dataset_status(dataset_id, "Error")
+            update_dataset_status(dataset_id, "Failed")
         return jsonify({
             "success": False,
             "failed_stage": "Backend/Flask",

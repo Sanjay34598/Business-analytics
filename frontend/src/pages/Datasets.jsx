@@ -159,9 +159,9 @@ function Datasets() {
                         <td>{ds.uploadDate}</td>
                         <td>
                           <span style={{ 
-                            color: ds.status.includes("Error") ? 'var(--color-danger)' : 
-                                   ds.status.includes("Processing") ? 'var(--color-warning)' : 
-                                   ds.status.includes("Processed") ? 'var(--color-success)' : 'var(--color-text-secondary)'
+                            color: ds.status === "Failed" ? 'var(--color-danger)' : 
+                                   ds.status === "Processing..." ? 'var(--color-warning)' : 
+                                   ds.status === "Completed" ? 'var(--color-success)' : 'var(--color-text-secondary)'
                           }}>
                             {ds.status}
                           </span>
@@ -172,9 +172,9 @@ function Datasets() {
                               className="secondary-button" 
                               style={{ padding: '6px 12px', fontSize: '12px' }}
                               onClick={() => handleAnalyze(ds.id)}
-                              disabled={actionLoading}
+                              disabled={actionLoading || ds.status === "Completed" || ds.status === "Processing..."}
                             >
-                              <FiPlayCircle /> Analyze
+                              <FiPlayCircle /> {ds.status === "Completed" ? "✔ Already Processed" : ds.status === "Processing..." ? "Processing..." : "Analyze"}
                             </button>
                             <button 
                               className="icon-button" 
