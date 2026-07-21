@@ -27,9 +27,8 @@ x_train , x_test , y_train , y_test = train_test_split(
 	random_state=42
 )
 
-model = LinearRegression()
-
-model.fit(x_train,y_train)
+import joblib
+model = joblib.load("ml/data/models/forecast_model.pkl")
 
 prediction = model.predict(x_test)
 
@@ -37,6 +36,28 @@ print("="*60)
 print("Model evaluation")
 print("="*60)
 
-print("MAE :",mean_absolute_error(y_test,prediction))
-print("MSE :",mean_squared_error(y_test,prediction))
-print("r2 score :",r2_score(y_test,prediction))
+mae = mean_absolute_error(y_test,prediction)
+mse = mean_squared_error(y_test,prediction)
+r2 = r2_score(y_test,prediction)
+
+print("MAE :", mae)
+print("MSE :", mse)
+print("r2 score :", r2)
+
+import os
+import json
+os.makedirs("ml/data/reports", exist_ok=True)
+
+metrics = {}
+if os.path.exists("ml/data/reports/metrics.json"):
+    with open("ml/data/reports/metrics.json", "r") as f:
+        metrics = json.load(f)
+
+metrics["forecast"] = {
+    "MAE": mae,
+    "MSE": mse,
+    "R2": r2
+}
+
+with open("ml/data/reports/metrics.json", "w") as f:
+    json.dump(metrics, f, indent=4)

@@ -44,4 +44,9 @@ forecast.to_csv(
 	index = False
 )
 
+import os
+import joblib
+os.makedirs("ml/data/models", exist_ok=True)
+joblib.dump(model, "ml/data/models/forecast_model.pkl")
+
 print("Forecast completed Succesfully")

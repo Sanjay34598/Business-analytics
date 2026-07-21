@@ -71,6 +71,8 @@ run("ml/models/explainable_ai/feature_importance.py")
 
 run("ml/models/explainable_ai/explain_prediction.py")
 
+run("ml/pipeline/generate_report.py")
+
 print("=" * 60)
 print("PIPELINE COMPLETED SUCCESSFULLY")
 print("=" * 60)

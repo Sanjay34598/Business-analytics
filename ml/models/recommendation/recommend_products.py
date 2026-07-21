@@ -24,4 +24,9 @@ recommend.to_csv(
 	"ml/data/processed/product_recommend.csv"
 )
 
+import os
+import joblib
+os.makedirs("ml/data/models", exist_ok=True)
+joblib.dump(recommend, "ml/data/models/recommendation_model.pkl")
+
 print("Saved Succesfully")

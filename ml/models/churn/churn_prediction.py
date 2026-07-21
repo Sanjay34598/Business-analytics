@@ -47,4 +47,9 @@ result.to_csv(
     index = False
 )
 
+import os
+import joblib
+os.makedirs("ml/data/models", exist_ok=True)
+joblib.dump(model, "ml/data/models/churn_model.pkl")
+
 print(" Prediction Completed Succesfully")
