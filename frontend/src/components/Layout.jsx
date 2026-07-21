@@ -1,16 +1,19 @@
+import { useState } from "react";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
 
 const Layout = ({ children }) => {
-  return (
-    <div className="app-layout">
-      <Sidebar />
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-      <div className="layout-content">
+  return (
+    <div className={`layout ${isSidebarCollapsed ? 'collapsed' : ''}`}>
+      <Sidebar isCollapsed={isSidebarCollapsed} setIsCollapsed={setIsSidebarCollapsed} />
+
+      <div className="main">
         <Navbar />
 
-        <main className="page-content">
+        <main className="content">
           {children}
         </main>
 

@@ -1,53 +1,82 @@
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import { FiX, FiUploadCloud, FiFileText, FiCheckCircle, FiPlay, FiLoader } from "react-icons/fi";
+import Papa from "papaparse";
+import { useDataset } from "../contexts/DatasetContext";
 
-const steps = ["Upload Dataset", "Preview Data", "Validate Columns", "Run Analysis", "Complete"];
+const steps = ["Choose Dataset", "Preview Data", "Validate", "Upload", "Processing", "Complete"];
 
 function NewAnalysisModal({ onClose }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [file, setFile] = useState(null);
+  const [previewRows, setPreviewRows] = useState([]);
+  const [headers, setHeaders] = useState([]);
+  const [uploadedDataset, setUploadedDataset] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [error, setError] = useState("");
 
-  const handleNext = () => {
-    if (currentStep === 3) {
-      // Step 4: Run Analysis
-      setIsProcessing(true);
-      return;
-    }
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      onClose(); // Finish
-      window.location.reload(); // Simulate dashboard refresh
+  const { uploadDataset, activateDataset, analyzeDataset, fetchDatasets } = useDataset();
+
+  const handleNext = async () => {
+    setError("");
+    try {
+      if (currentStep === 0 && file) {
+        // Prepare preview
+        Papa.parse(file, {
+          header: true,
+          skipEmptyLines: true,
+          complete: (results) => {
+            setHeaders(results.meta.fields || []);
+            setPreviewRows(results.data.slice(0, 5));
+            setCurrentStep(1);
+          },
+          error: (err) => setError("Error reading CSV: " + err.message)
+        });
+        return;
+      }
+
+      if (currentStep === 2) {
+        // Upload phase
+        setCurrentStep(3);
+        setIsUploading(true);
+        try {
+          const ds = await uploadDataset(file);
+          setUploadedDataset(ds);
+          setIsUploading(false);
+          setCurrentStep(4);
+          
+          // Auto start processing
+          setIsProcessing(true);
+          await activateDataset(ds.id);
+          await analyzeDataset(ds.id);
+          setIsProcessing(false);
+          setCurrentStep(5);
+        } catch (err) {
+          setError(err.message);
+          setIsUploading(false);
+          setIsProcessing(false);
+        }
+        return;
+      }
+
+      if (currentStep < steps.length - 1) {
+        setCurrentStep(currentStep + 1);
+      } else {
+        await fetchDatasets();
+        onClose(); // Finish
+      }
+    } catch (err) {
+      setError(err.message);
     }
   };
 
   const handleBack = () => {
+    setError("");
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     }
   };
 
-  useEffect(() => {
-    if (isProcessing) {
-      // Mock progress simulation
-      const interval = setInterval(() => {
-        setProgress(prev => {
-          if (prev >= 100) {
-            clearInterval(interval);
-            setIsProcessing(false);
-            setCurrentStep(4);
-            return 100;
-          }
-          return prev + 10;
-        });
-      }, 300);
-      return () => clearInterval(interval);
-    }
-  }, [isProcessing]);
-
-  // Handlers for mock file drop
   const handleDrop = (e) => {
     e.preventDefault();
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
@@ -55,77 +84,83 @@ function NewAnalysisModal({ onClose }) {
     }
   };
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
-  };
-
   return (
-    <div className="modal-overlay">
-      <div className="modal-content" style={{ maxWidth: '800px', height: '600px' }}>
+    <div className="modal-overlay" style={{ zIndex: 1000 }}>
+      <div className="modal-content" style={{ maxWidth: '800px', minHeight: '600px', display: 'flex', flexDirection: 'column' }}>
         
         <div className="modal-header">
           <h2>New Analysis Workflow</h2>
-          <button className="modal-close" onClick={onClose}><FiX /></button>
+          <button className="modal-close" onClick={onClose} disabled={isUploading || isProcessing}><FiX /></button>
         </div>
 
         {/* Stepper */}
-        <div style={{ display: 'flex', padding: '24px', borderBottom: '1px solid var(--color-border)', gap: '16px', background: 'var(--color-surface-alt)' }}>
+        <div style={{ display: 'flex', padding: '24px', borderBottom: '1px solid var(--color-border)', gap: '8px', background: 'var(--color-surface-alt)', overflowX: 'auto' }}>
           {steps.map((step, index) => (
-            <div key={step} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div style={{ height: '4px', background: index <= currentStep ? 'var(--color-primary)' : 'var(--color-border)', borderRadius: '2px' }} />
+            <div key={step} style={{ flex: 1, minWidth: '100px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ height: '4px', background: index <= currentStep ? 'var(--color-primary)' : 'var(--color-border)', borderRadius: '2px', transition: 'background 0.3s' }} />
               <span style={{ fontSize: '11px', fontWeight: 600, color: index <= currentStep ? 'var(--color-text)' : 'var(--color-text-muted)', textTransform: 'uppercase' }}>
                 Step {index + 1}
               </span>
-              <span style={{ fontSize: '13px', color: index <= currentStep ? 'var(--color-text)' : 'var(--color-text-muted)' }}>
+              <span style={{ fontSize: '12px', color: index <= currentStep ? 'var(--color-text)' : 'var(--color-text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {step}
               </span>
             </div>
           ))}
         </div>
 
-        <div className="modal-body" style={{ display: 'flex', flexDirection: 'column' }}>
+        <div className="modal-body" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+          {error && (
+            <div style={{ background: 'var(--color-danger-bg)', color: 'var(--color-danger)', padding: '12px', borderRadius: '4px', marginBottom: '16px', fontSize: '14px' }}>
+              {error}
+            </div>
+          )}
+
           {currentStep === 0 && (
             <div 
-              style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px dashed var(--color-border)', borderRadius: 'var(--radius-lg)', background: 'var(--color-surface-alt)' }}
+              style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px dashed var(--color-border)', borderRadius: 'var(--radius-lg)', background: 'var(--color-surface-alt)', padding: '40px' }}
               onDrop={handleDrop}
-              onDragOver={handleDragOver}
+              onDragOver={(e) => e.preventDefault()}
             >
               <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--color-primary-light)', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
                 <FiUploadCloud size={32} />
               </div>
-              <h3 style={{ fontSize: '16px', marginBottom: '8px' }}>Drag and drop your dataset here</h3>
-              <p style={{ color: 'var(--color-text-secondary)', marginBottom: '24px' }}>CSV, Excel, or JSON formats up to 50MB</p>
+              <h3 style={{ fontSize: '18px', marginBottom: '8px' }}>Select or Drag Dataset</h3>
+              <p style={{ color: 'var(--color-text-secondary)', marginBottom: '24px' }}>Upload a CSV file for analysis.</p>
+              
+              <input type="file" id="file-upload" accept=".csv" style={{ display: 'none' }} onChange={(e) => setFile(e.target.files[0])} />
               
               {file ? (
                 <div style={{ padding: '12px 24px', background: 'var(--color-surface)', border: '1px solid var(--color-primary)', borderRadius: 'var(--radius-md)', color: 'var(--color-primary)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <FiFileText /> {file.name}
+                  <button onClick={() => setFile(null)} style={{ background: 'none', border: 'none', color: 'var(--color-danger)', cursor: 'pointer', marginLeft: '8px' }}><FiX /></button>
                 </div>
               ) : (
-                <button className="secondary-button">Browse Files</button>
+                <button className="primary-button" onClick={() => document.getElementById('file-upload').click()}>
+                  Browse Files
+                </button>
               )}
-              {/* TODO: Connect to backend endpoint for actual file upload */}
             </div>
           )}
 
           {currentStep === 1 && (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <h3 style={{ fontSize: '16px' }}>Data Preview</h3>
-              <p style={{ color: 'var(--color-text-secondary)' }}>Review the first few rows of your uploaded dataset to ensure correct parsing.</p>
+              <p style={{ color: 'var(--color-text-secondary)' }}>Review the first few rows of {file?.name}</p>
               
-              <div className="table-panel" style={{ flex: 1, padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                <div className="table-scroll" style={{ margin: 0, overflowY: 'auto' }}>
+              <div className="table-panel" style={{ flex: 1, padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', border: '1px solid var(--color-border)' }}>
+                <div className="table-scroll" style={{ margin: 0, overflow: 'auto' }}>
                   <table>
                     <thead>
                       <tr>
-                        <th>Sale_Date</th><th>Product_ID</th><th>Region</th><th>Sales_Amount</th><th>Customer_Type</th>
+                        {headers.map(h => <th key={h}>{h}</th>)}
                       </tr>
                     </thead>
                     <tbody>
-                      {/* Mock Data */}
-                      <tr><td>2026-07-01</td><td>PROD_948</td><td>0</td><td>₹4,520</td><td>1</td></tr>
-                      <tr><td>2026-07-02</td><td>PROD_112</td><td>2</td><td>₹1,250</td><td>0</td></tr>
-                      <tr><td>2026-07-02</td><td>PROD_395</td><td>1</td><td>₹8,900</td><td>1</td></tr>
-                      <tr><td>2026-07-03</td><td>PROD_948</td><td>3</td><td>₹4,200</td><td>0</td></tr>
+                      {previewRows.map((row, i) => (
+                        <tr key={i}>
+                          {headers.map(h => <td key={h}>{row[h]}</td>)}
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
@@ -136,14 +171,14 @@ function NewAnalysisModal({ onClose }) {
           {currentStep === 2 && (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <h3 style={{ fontSize: '16px' }}>Validate Columns</h3>
-              <p style={{ color: 'var(--color-text-secondary)' }}>Map the columns from your dataset to the required schema for analysis.</p>
+              <p style={{ color: 'var(--color-text-secondary)' }}>Ensuring dataset meets ML pipeline requirements.</p>
               
               <div style={{ display: 'grid', gap: '12px' }}>
-                {["Sale_Date (Date)", "Product_ID (String)", "Sales_Amount (Numeric)", "Customer_Type (Category)"].map((req, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
+                {headers.slice(0, 5).map((req, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', background: 'var(--color-surface)' }}>
                     <div>
-                      <strong style={{ display: 'block', fontSize: '13px' }}>{req}</strong>
-                      <span style={{ fontSize: '11px', color: 'var(--color-success)' }}>Auto-mapped successfully</span>
+                      <strong style={{ display: 'block', fontSize: '14px' }}>{req}</strong>
+                      <span style={{ fontSize: '12px', color: 'var(--color-success)' }}>Ready for processing</span>
                     </div>
                     <FiCheckCircle color="var(--color-success)" size={20} />
                   </div>
@@ -152,56 +187,46 @@ function NewAnalysisModal({ onClose }) {
             </div>
           )}
 
-          {currentStep === 3 && (
+          {(currentStep === 3 || currentStep === 4) && (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px' }}>
-              {isProcessing ? (
-                <>
-                  <FiLoader size={48} color="var(--color-primary)" className="loading-spinner" />
-                  <div style={{ textAlign: 'center' }}>
-                    <h3 style={{ fontSize: '18px', marginBottom: '8px' }}>Processing Analytics...</h3>
-                    <p style={{ color: 'var(--color-text-secondary)' }}>Running machine learning models and generating insights.</p>
-                  </div>
-                  <div style={{ width: '100%', maxWidth: '400px', height: '8px', background: 'var(--color-border)', borderRadius: '4px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${progress}%`, background: 'var(--color-primary)', transition: 'width 0.3s ease' }} />
-                  </div>
-                  <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-primary)' }}>{progress}% Complete</span>
-                </>
-              ) : (
-                <>
-                  <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--color-primary-light)', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <FiPlay size={32} />
-                  </div>
-                  <div style={{ textAlign: 'center', maxWidth: '400px' }}>
-                    <h3 style={{ fontSize: '20px', marginBottom: '12px' }}>Ready for Analysis</h3>
-                    <p style={{ color: 'var(--color-text-secondary)' }}>The dataset is validated. We will now run the sales forecast, customer churn, and inventory recommendation models.</p>
-                  </div>
-                </>
-              )}
+              <FiLoader size={48} color="var(--color-primary)" className="loading-spinner" />
+              <div style={{ textAlign: 'center' }}>
+                <h3 style={{ fontSize: '20px', marginBottom: '8px' }}>
+                  {currentStep === 3 ? "Uploading Dataset..." : "Running ML Analysis..."}
+                </h3>
+                <p style={{ color: 'var(--color-text-secondary)' }}>
+                  {currentStep === 3 ? "Storing securely on the server." : "Processing sales forecasting and churn models. This may take a minute."}
+                </p>
+              </div>
             </div>
           )}
 
-          {currentStep === 4 && (
+          {currentStep === 5 && (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', textAlign: 'center' }}>
               <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--color-success-bg)', color: 'var(--color-success)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <FiCheckCircle size={40} />
               </div>
               <h3 style={{ fontSize: '24px', fontWeight: 700 }}>Analysis Complete!</h3>
-              <p style={{ color: 'var(--color-text-secondary)', maxWidth: '400px' }}>Your dashboard is ready with the latest insights. You can view the full reports or start exploring the data immediately.</p>
+              <p style={{ color: 'var(--color-text-secondary)', maxWidth: '400px' }}>Your dataset has been fully processed and set as the active dataset. The dashboard has been updated.</p>
             </div>
           )}
         </div>
 
-        <div className="modal-footer">
-          {currentStep > 0 && currentStep < 4 && !isProcessing && (
-            <button className="secondary-button" onClick={handleBack}>Back</button>
-          )}
-          <button 
-            className="primary-button" 
-            onClick={handleNext}
-            disabled={isProcessing || (currentStep === 0 && !file)}
-          >
-            {currentStep === 3 ? "Run Analysis" : currentStep === 4 ? "View Dashboard" : "Continue"}
-          </button>
+        <div className="modal-footer" style={{ borderTop: '1px solid var(--color-border)', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', background: 'var(--color-surface)' }}>
+          <div>
+            {currentStep > 0 && currentStep < 3 && (
+              <button className="secondary-button" onClick={handleBack}>Back</button>
+            )}
+          </div>
+          <div>
+            <button 
+              className="primary-button" 
+              onClick={handleNext}
+              disabled={isUploading || isProcessing || (currentStep === 0 && !file)}
+            >
+              {currentStep === 2 ? "Upload & Analyze" : currentStep === 5 ? "View Dashboard" : "Continue"}
+            </button>
+          </div>
         </div>
 
       </div>

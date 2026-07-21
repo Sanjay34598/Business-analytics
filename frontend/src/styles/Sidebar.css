@@ -2,16 +2,38 @@
   position: fixed;
   inset: 0 auto 0 0;
   z-index: 20;
-  width: var(--sidebar-width);
+  width: var(--sidebar-width, 250px);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background: var(--sidebar-bg);
-  color: var(--sidebar-text);
-  box-shadow: var(--shadow-lg);
-  transition: transform var(--duration-normal) var(--ease-out);
+  background: var(--sidebar-bg, var(--surface));
+  color: var(--sidebar-text, var(--text));
+  border-right: 1px solid var(--border);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+.sidebar.collapsed {
+  width: 72px;
+}
+
+.collapse-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  margin-left: auto;
+}
+
+.collapse-btn:hover {
+  background: var(--surface-secondary);
+  color: var(--text);
+}
+
 
 .brand {
   min-height: 72px;

@@ -54,8 +54,20 @@ function Navbar() {
         setShowNotificationMenu(false);
       }
     }
+
+    function handleKeyDown(event) {
+      if (event.key === "Escape") {
+        setShowProfileMenu(false);
+        setShowNotificationMenu(false);
+      }
+    }
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
   const markAllRead = () => {

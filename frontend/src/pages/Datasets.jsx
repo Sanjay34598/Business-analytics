@@ -1,270 +1,205 @@
-import { useRef, useState } from "react";
-import { FiDatabase, FiUploadCloud, FiTrash2, FiDownload, FiRefreshCw, FiClock, FiFile, FiAlertCircle, FiCheckCircle } from "react-icons/fi";
-import Papa from "papaparse";
+import { useState, useRef } from "react";
+import { FiDatabase, FiUploadCloud, FiTrash2, FiRefreshCw, FiClock, FiFile, FiAlertCircle, FiCheckCircle, FiPlayCircle } from "react-icons/fi";
 import Layout from "../components/Layout";
 import PageHeader from "../components/PageHeader";
 import StatCard from "../components/StatCard";
+import NewAnalysisModal from "../components/NewAnalysisModal";
+import { useDataset } from "../contexts/DatasetContext";
 import "../styles/Dashboard.css";
 
 function Datasets() {
-  const [isDeleting, setIsDeleting] = useState(false);
-  const fileInputRef = useRef(null);
+  const { datasets, activeDataset, loading, deleteDataset, activateDataset, analyzeDataset } = useDataset();
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [isUploading, setIsUploading] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  
-  const [datasetInfo, setDatasetInfo] = useState({
-    name: "Q3_Sales_Master.csv",
-    rows: 15420,
-    columns: 12,
-    size: "4.2 MB",
-    uploadDate: "Oct 12, 2026, 09:41 AM",
-    status: "Processed & Active",
-    headers: ["ID", "Sale Date", "Product ID", "Region", "Sales Amount", "Customer Type"]
-  });
+  const [actionLoading, setActionLoading] = useState(false);
 
-  const [previewRows, setPreviewRows] = useState([
-    { "ID": 1, "Sale Date": "2026-07-01", "Product ID": "PROD_948", "Region": "North", "Sales Amount": "₹4,520", "Customer Type": "New" },
-    { "ID": 2, "Sale Date": "2026-07-02", "Product ID": "PROD_112", "Region": "South", "Sales Amount": "₹1,250", "Customer Type": "Returning" },
-    { "ID": 3, "Sale Date": "2026-07-02", "Product ID": "PROD_395", "Region": "East", "Sales Amount": "₹8,900", "Customer Type": "New" },
-    { "ID": 4, "Sale Date": "2026-07-03", "Product ID": "PROD_948", "Region": "West", "Sales Amount": "₹4,200", "Customer Type": "Returning" },
-    { "ID": 5, "Sale Date": "2026-07-04", "Product ID": "PROD_112", "Region": "North", "Sales Amount": "₹2,100", "Customer Type": "Returning" },
-  ]);
-
-  const processFile = (file) => {
-    if (!file) return;
-    if (!file.name.endsWith('.csv')) {
-      setError("Please upload a valid CSV file.");
-      setSuccess("");
-      return;
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this dataset?")) return;
+    setActionLoading(true);
+    try {
+      await deleteDataset(id);
+      setSuccess("Dataset deleted successfully.");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setActionLoading(false);
     }
+  };
 
-    setIsUploading(true);
+  const handleActivate = async (id) => {
+    setActionLoading(true);
     setError("");
     setSuccess("");
-
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => {
-        setIsUploading(false);
-        if (results.errors.length > 0) {
-          setError("Error parsing CSV: " + results.errors[0].message);
-          return;
-        }
-
-        const data = results.data;
-        const headers = results.meta.fields || [];
-        
-        setDatasetInfo({
-          name: file.name,
-          rows: data.length,
-          columns: headers.length,
-          size: (file.size / (1024 * 1024)).toFixed(2) + " MB",
-          uploadDate: new Date().toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" }),
-          status: "Processed & Active",
-          headers: headers
-        });
-
-        setPreviewRows(data.slice(0, 5));
-        setSuccess(`Dataset '${file.name}' uploaded and processed successfully.`);
-      },
-      error: (err) => {
-        setIsUploading(false);
-        setError("Error reading file: " + err.message);
-      }
-    });
-  };
-
-  const handleFileUpload = (event) => {
-    processFile(event.target.files?.[0]);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
-  const handleDrop = (event) => {
-    event.preventDefault();
-    setIsDragging(false);
-    if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
-      processFile(event.dataTransfer.files[0]);
-      event.dataTransfer.clearData();
+    try {
+      await activateDataset(id);
+      setSuccess("Dataset set as active. Run analysis to update dashboards.");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setActionLoading(false);
     }
   };
 
-  const handleDelete = () => {
-    setIsDeleting(false);
-    setDatasetInfo(null);
-    setPreviewRows([]);
-    setSuccess("Dataset deleted successfully.");
+  const handleAnalyze = async (id) => {
+    setActionLoading(true);
     setError("");
+    setSuccess("");
+    try {
+      // First ensure it's active
+      await activateDataset(id);
+      // Then analyze
+      await analyzeDataset(id);
+      setSuccess("Analysis complete! Dashboards updated.");
+      setTimeout(() => setSuccess(""), 4000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   return (
     <Layout>
-      <div 
-        className="content" 
-        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-        onDragLeave={() => setIsDragging(false)}
-        onDrop={handleDrop}
-        style={{ border: isDragging ? '2px dashed var(--color-primary)' : 'none', minHeight: '100%' }}
-      >
-          <PageHeader 
-            title="Dataset Management" 
-            subtitle="View and manage the core data driving your analytics and machine learning models."
-            actions={
-              <>
-                <input 
-                  type="file" 
-                  accept=".csv" 
-                  ref={fileInputRef} 
-                  style={{ display: "none" }} 
-                  onChange={handleFileUpload}
-                />
-                <button 
-                  className="primary-button" 
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploading}
-                >
-                  <FiUploadCloud /> {isUploading ? "Uploading..." : "Upload Dataset"}
-                </button>
-              </>
-            }
-          />
+      <div className="content">
+        <PageHeader 
+          title="Dataset Management" 
+          subtitle="Manage uploaded datasets, switch active models, and trigger new ML analysis."
+          actions={
+            <button 
+              className="primary-button" 
+              onClick={() => setIsUploadModalOpen(true)}
+            >
+              <FiUploadCloud /> Upload Dataset
+            </button>
+          }
+        />
 
-          {error && (
-            <div style={{ background: 'var(--color-danger-bg)', color: 'var(--color-danger)', padding: '12px 16px', borderRadius: 'var(--radius-md)', marginBottom: 'var(--space-lg)', display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid var(--color-danger)' }}>
-              <FiAlertCircle /> <span>{error}</span>
+        {error && (
+          <div style={{ background: 'var(--color-danger-bg)', color: 'var(--color-danger)', padding: '12px 16px', borderRadius: 'var(--radius-md)', marginBottom: 'var(--space-lg)', display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid var(--color-danger)' }}>
+            <FiAlertCircle /> <span>{error}</span>
+          </div>
+        )}
+
+        {success && (
+          <div style={{ background: 'var(--color-success-bg)', color: 'var(--color-success)', padding: '12px 16px', borderRadius: 'var(--radius-md)', marginBottom: 'var(--space-lg)', display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid var(--color-success)' }}>
+            <FiCheckCircle /> <span>{success}</span>
+          </div>
+        )}
+
+        {loading ? (
+          <div style={{ padding: '64px', textAlign: 'center', color: 'var(--color-text-secondary)' }}>Loading datasets...</div>
+        ) : datasets.length === 0 ? (
+          <div className="empty-state" style={{ padding: '64px', background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--color-border)', textAlign: 'center' }}>
+            <div style={{ width: '64px', height: '64px', background: 'var(--color-primary-light)', color: 'var(--color-primary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' }}>
+              <FiDatabase size={32} />
             </div>
-          )}
-
-          {success && (
-            <div style={{ background: 'var(--color-success-bg)', color: 'var(--color-success)', padding: '12px 16px', borderRadius: 'var(--radius-md)', marginBottom: 'var(--space-lg)', display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid var(--color-success)' }}>
-              <FiCheckCircle /> <span>{success}</span>
-            </div>
-          )}
-
-          {datasetInfo ? (
-            <>
-              <div className="cards cards--three">
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '18px' }}>No Datasets Available</h3>
+            <p style={{ color: 'var(--color-text-secondary)', marginBottom: '24px' }}>Upload a CSV file to begin analysis.</p>
+            <button className="primary-button" style={{ margin: '0 auto' }} onClick={() => setIsUploadModalOpen(true)}>
+              Upload Now
+            </button>
+          </div>
+        ) : (
+          <>
+            {activeDataset && (
+              <div className="cards cards--three" style={{ marginBottom: 'var(--space-2xl)' }}>
                 <StatCard 
-                  title="Current Dataset" 
-                  value={datasetInfo.name} 
-                  detail={`Status: ${datasetInfo.status}`} 
+                  title="Active Dataset" 
+                  value={activeDataset.name} 
+                  detail={`Status: ${activeDataset.status}`} 
                   icon={FiDatabase} 
                   tone="teal" 
                 />
                 <StatCard 
-                  title="Volume" 
-                  value={datasetInfo.rows.toLocaleString()} 
-                  detail={`Rows across ${datasetInfo.columns} columns`} 
+                  title="Data Volume" 
+                  value={activeDataset.rows.toLocaleString()} 
+                  detail={`Rows across ${activeDataset.columns} columns`} 
                   icon={FiFile} 
                   tone="slate" 
                 />
                 <StatCard 
-                  title="Last Updated" 
-                  value={datasetInfo.uploadDate.split(',')[0]} 
-                  detail={datasetInfo.uploadDate.split(',').slice(1).join(',').trim()} 
+                  title="Uploaded On" 
+                  value={activeDataset.uploadDate.split(',')[0]} 
+                  detail={activeDataset.uploadDate} 
                   icon={FiClock} 
                   tone="green" 
                 />
               </div>
+            )}
 
-              <section className="table-panel" style={{ marginBottom: 'var(--space-lg)' }}>
-                <div className="panel-heading">
-                  <div>
-                    <h2>Dataset Information</h2>
-                    <p>Metadata and management controls for the active dataset.</p>
-                  </div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button className="secondary-button" style={{ minHeight: '32px', fontSize: '12px' }} onClick={() => fileInputRef.current?.click()}>
-                      <FiRefreshCw /> Replace
-                    </button>
-                    <button 
-                      className="secondary-button text-danger" 
-                      style={{ minHeight: '32px', fontSize: '12px', borderColor: 'var(--color-danger-bg)' }}
-                      onClick={() => setIsDeleting(true)}
-                    >
-                      <FiTrash2 /> Delete
-                    </button>
-                  </div>
+            <section className="table-panel">
+              <div className="panel-heading">
+                <div>
+                  <h2>Dataset History</h2>
+                  <p>All previously uploaded datasets available for analysis.</p>
                 </div>
-                
-                <dl className="summary-list">
-                  <div>
-                    <dt>File Name</dt>
-                    <dd style={{ fontSize: '15px' }}>{datasetInfo.name}</dd>
-                  </div>
-                  <div>
-                    <dt>File Size</dt>
-                    <dd style={{ fontSize: '15px' }}>{datasetInfo.size}</dd>
-                  </div>
-                  <div>
-                    <dt>Processing Status</dt>
-                    <dd style={{ fontSize: '15px', color: 'var(--color-success)' }}>{datasetInfo.status}</dd>
-                  </div>
-                </dl>
-              </section>
-
-              <section className="table-panel">
-                <div className="panel-heading">
-                  <div>
-                    <h2>Data Preview</h2>
-                    <p>Top 5 rows of the currently loaded dataset.</p>
-                  </div>
-                  <span className="record-count">{Math.min(5, datasetInfo.rows)} / {datasetInfo.rows.toLocaleString()} rows</span>
-                </div>
-                <div className="table-scroll" style={{ maxWidth: '100%', overflowX: 'auto' }}>
-                  <table>
-                    <thead>
-                      <tr>
-                        {datasetInfo.headers.map((header, i) => (
-                          <th key={i}>{header}</th>
-                        ))}
+              </div>
+              <div className="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Size</th>
+                      <th>Rows / Cols</th>
+                      <th>Uploaded</th>
+                      <th>Status</th>
+                      <th style={{ textAlign: 'right' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {datasets.map((ds) => (
+                      <tr key={ds.id} style={{ background: ds.active ? 'var(--color-surface-alt)' : 'transparent' }}>
+                        <td style={{ fontWeight: ds.active ? 600 : 400 }}>
+                          {ds.name} {ds.active && <span style={{ marginLeft: '8px', fontSize: '10px', background: 'var(--color-primary)', color: 'white', padding: '2px 6px', borderRadius: '10px' }}>ACTIVE</span>}
+                        </td>
+                        <td>{ds.size}</td>
+                        <td>{ds.rows.toLocaleString()} / {ds.columns}</td>
+                        <td>{ds.uploadDate}</td>
+                        <td>
+                          <span style={{ 
+                            color: ds.status.includes("Error") ? 'var(--color-danger)' : 
+                                   ds.status.includes("Processing") ? 'var(--color-warning)' : 
+                                   ds.status.includes("Processed") ? 'var(--color-success)' : 'var(--color-text-secondary)'
+                          }}>
+                            {ds.status}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                            <button 
+                              className="secondary-button" 
+                              style={{ padding: '6px 12px', fontSize: '12px' }}
+                              onClick={() => handleAnalyze(ds.id)}
+                              disabled={actionLoading}
+                            >
+                              <FiPlayCircle /> Analyze
+                            </button>
+                            <button 
+                              className="icon-button" 
+                              style={{ color: 'var(--color-danger)' }}
+                              onClick={() => handleDelete(ds.id)}
+                              disabled={actionLoading}
+                              title="Delete Dataset"
+                            >
+                              <FiTrash2 />
+                            </button>
+                          </div>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {previewRows.map((row, i) => (
-                        <tr key={i}>
-                          {datasetInfo.headers.map((header, j) => (
-                            <td key={j}>{row[header]}</td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-            </>
-          ) : (
-            <div className="empty-state" style={{ padding: '64px', background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--color-border)', textAlign: 'center' }}>
-              <div style={{ width: '64px', height: '64px', background: 'var(--color-primary-light)', color: 'var(--color-primary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' }}>
-                <FiUploadCloud size={32} />
+                    ))}
+                  </tbody>
+                </table>
               </div>
-              <h3 style={{ margin: '0 0 8px 0', fontSize: '18px' }}>No Dataset Active</h3>
-              <p style={{ color: 'var(--color-text-secondary)', marginBottom: '24px' }}>Upload a CSV file to begin analysis or use drag and drop.</p>
-              <button className="primary-button" style={{ margin: '0 auto' }} onClick={() => fileInputRef.current?.click()}>
-                Browse Files
-              </button>
-            </div>
-          )}
+            </section>
+          </>
+        )}
+      </div>
 
-          {isDeleting && (
-            <div className="modal-overlay">
-              <div className="modal-content" style={{ maxWidth: '400px' }}>
-                <div className="modal-header" style={{ borderBottom: 'none' }}>
-                  <h2 style={{ color: 'var(--color-danger)' }}>Delete Dataset?</h2>
-                </div>
-                <div className="modal-body" style={{ paddingTop: 0 }}>
-                  <p>Are you sure you want to delete <strong>{datasetInfo.name}</strong>? This action will disable all analytics until a new dataset is uploaded.</p>
-                </div>
-                <div className="modal-footer" style={{ background: 'transparent', borderTop: 'none' }}>
-                  <button className="secondary-button" onClick={() => setIsDeleting(false)}>Cancel</button>
-                  <button className="primary-button" style={{ background: 'var(--color-danger)' }} onClick={handleDelete}>Delete Dataset</button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+      {isUploadModalOpen && (
+        <NewAnalysisModal onClose={() => setIsUploadModalOpen(false)} />
+      )}
     </Layout>
   );
 }
