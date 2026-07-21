@@ -7,5 +7,5 @@ sales_bp = Blueprint("sales", __name__)
 def get_sales():
 
     return jsonify(
-        ld.sales.head(100).to_dict(orient="records")
+        ld.sales.to_dict(orient="records")
     )
