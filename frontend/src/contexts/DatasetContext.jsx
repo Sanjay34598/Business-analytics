@@ -12,7 +12,23 @@ export const DatasetProvider = ({ children }) => {
     try {
       const data = await getApiData("/datasets");
       setDatasets(data);
-      const active = data.find(d => d.active) || null;
+      
+      const savedId = localStorage.getItem("activeDatasetId");
+      let active = data.find(d => d.active) || null;
+      
+      // If there's a saved dataset ID that is different from backend's active, 
+      // but the dataset is Completed, activate it immediately on the client.
+      if (savedId && active?.id !== savedId) {
+        const savedDataset = data.find(d => d.id === savedId && d.status === "Completed");
+        if (savedDataset) {
+          // Fire-and-forget activation on the backend
+          fetch(`/datasets/${savedId}/active`, { method: "PUT" }).catch(console.error);
+          active = savedDataset;
+        }
+      } else if (active?.id) {
+        localStorage.setItem("activeDatasetId", active.id);
+      }
+      
       setActiveDataset(active);
     } catch (err) {
       console.error("Failed to fetch datasets:", err);
@@ -54,6 +70,7 @@ export const DatasetProvider = ({ children }) => {
       throw new Error(error.error || "Failed to activate dataset");
     }
     
+    localStorage.setItem("activeDatasetId", id);
     await fetchDatasets();
   };
 

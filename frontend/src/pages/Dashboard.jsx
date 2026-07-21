@@ -14,6 +14,8 @@ import { useDataset } from "../contexts/DatasetContext";
 import "../styles/Dashboard.css";
 import Layout from "../components/Layout";
 
+import DatasetSwitcher from "../components/DatasetSwitcher";
+
 ChartJS.register(ArcElement, Tooltip, Legend);
 const currency = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
 const labelCustomerType = (value) => Number(value) === 0 ? "New" : "Returning";
@@ -47,7 +49,7 @@ function Dashboard() {
 
   useEffect(() => {
     loadDashboard();
-  }, [loadDashboard]);
+  }, [loadDashboard, activeDataset?.id]);
 
   const metrics = useMemo(() => {
     const totalSales = sales.reduce((sum, item) => sum + Number(item.Sales_Amount || 0), 0);
@@ -93,55 +95,25 @@ function Dashboard() {
 return (
   <Layout>
     <div className="content">
-          <PageHeader 
-            title="Business Overview" 
-            subtitle="A consolidated view of sales performance and analytical model output." 
-          />
-          {loading ? (
-            <Loader />
-          ) : error ? (
-            <ErrorState 
-              title="Dashboard data could not be loaded" 
-              message={error} 
-              onRetry={loadDashboard} 
-            />
-          ) : (
-            <>
-              {activeDataset && (
-                  <div style={{ display: 'flex', gap: '24px', padding: '16px 24px', background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', marginBottom: 'var(--space-lg)' }}>
-                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-md)', background: 'var(--color-primary-light)', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <FiDatabase size={20} />
-                      </div>
-                      <div>
-                        <span style={{ display: 'block', fontSize: '11px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Active Dataset</span>
-                        <strong style={{ fontSize: '15px' }}>{activeDataset.name}</strong>
-                      </div>
-                    </div>
-                    <div style={{ width: '1px', background: 'var(--color-border)' }} />
-                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-md)', background: 'var(--color-surface-alt)', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--color-border)' }}>
-                        <FiCheckCircle size={18} />
-                      </div>
-                      <div>
-                        <span style={{ display: 'block', fontSize: '11px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Model Status</span>
-                        <strong style={{ fontSize: '15px', color: 'var(--color-success)' }}>{activeDataset.status}</strong>
-                      </div>
-                    </div>
-                    <div style={{ width: '1px', background: 'var(--color-border)' }} />
-                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-md)', background: 'var(--color-surface-alt)', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--color-border)' }}>
-                        <FiClock size={18} />
-                      </div>
-                      <div>
-                        <span style={{ display: 'block', fontSize: '11px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Last Analysis</span>
-                        <strong style={{ fontSize: '15px' }}>{activeDataset.uploadDate.split(',')[0]}</strong>
-                      </div>
-                    </div>
-                  </div>
-              )}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--space-lg)' }}>
+        <PageHeader 
+          title="Business Overview" 
+          subtitle="A consolidated view of sales performance and analytical model output." 
+        />
+        <DatasetSwitcher />
+      </div>
 
-                  <div className="cards">
+      {loading ? (
+        <Loader />
+      ) : error ? (
+        <ErrorState 
+          title="Dashboard data could not be loaded" 
+          message={error} 
+          onRetry={loadDashboard} 
+        />
+      ) : (
+        <div key={activeDataset?.id}>
+          <div className="cards">
                     <StatCard 
                       title="Total Sales" 
                       value={`₹ ${currency.format(metrics.totalSales)}`} 
@@ -303,7 +275,7 @@ return (
                   )}
                 </div>
               </section>
-            </>
+            </div>
           )}
         </div>
       </Layout>

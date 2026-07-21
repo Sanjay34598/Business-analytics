@@ -28,5 +28,15 @@
         "uploadDate": "Jul 21, 2026, 07:56 PM",
         "status": "Completed",
         "active": true
+    },
+    {
+        "id": "c74ee34c-ac3b-4c79-84d9-ea159e479c1d",
+        "name": "test_dataset_500.csv",
+        "rows": 500,
+        "columns": 23,
+        "size": "0.1 MB",
+        "uploadDate": "Jul 21, 2026, 08:14 PM",
+        "status": "Uploaded",
+        "active": false
     }
 ]
