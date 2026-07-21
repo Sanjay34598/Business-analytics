@@ -83,9 +83,10 @@ export const DatasetProvider = ({ children }) => {
     });
     
     if (!res.ok) {
-      const error = await res.json();
+      const errorData = await res.json();
       await fetchDatasets();
-      throw new Error(error.error || "Analysis failed");
+      // Throw the object so the caller can display detailed error info
+      throw errorData;
     }
     
     await fetchDatasets();

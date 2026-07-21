@@ -64,11 +64,9 @@ def analyze_dataset():
         update_dataset_status(dataset_id, "Processing...")
         
     try:
-        # Get base directory (project root)
         current_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.dirname(os.path.dirname(current_dir))
         
-        # Run ML pipeline as subprocess
         result = subprocess.run(
             ["python", "ml/pipeline/run_pipeline.py"],
             cwd=project_root,
@@ -79,20 +77,59 @@ def analyze_dataset():
         if result.returncode != 0:
             if dataset_id:
                 update_dataset_status(dataset_id, "Error")
+            
+            stderr = result.stderr or ""
+            stdout = result.stdout or ""
+            
+            # Simple heuristic to extract the failed stage
+            import re
+            failed_stage = "Unknown"
+            stage_match = re.findall(r"Failed ([\w/.]+)", stdout + stderr)
+            if stage_match:
+                failed_stage = stage_match[-1]
+                
+            # Extract exception
+            exception_type = "Exception"
+            message = "Pipeline execution failed"
+            
+            tb_lines = stderr.strip().split('\n')
+            if tb_lines:
+                last_line = tb_lines[-1]
+                if ":" in last_line and "Traceback" not in last_line:
+                    parts = last_line.split(":", 1)
+                    exception_type = parts[0].strip()
+                    message = parts[1].strip()
+                else:
+                    message = last_line
+
             return jsonify({
-                "error": "Pipeline execution failed", 
-                "details": result.stderr
+                "success": False,
+                "failed_stage": failed_stage,
+                "exception": exception_type,
+                "message": message,
+                "stdout": stdout,
+                "stderr": stderr,
+                "traceback": stderr,
+                "exit_code": result.returncode
             }), 500
             
-        # Reload the in-memory dataframes for the Flask APIs
         reload_data()
         
         if dataset_id:
             update_dataset_status(dataset_id, "Processed & Active")
             
-        return jsonify({"message": "Analysis completed successfully", "output": result.stdout})
+        return jsonify({"success": True, "message": "Analysis completed successfully", "output": result.stdout})
         
     except Exception as e:
         if dataset_id:
             update_dataset_status(dataset_id, "Error")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({
+            "success": False,
+            "failed_stage": "Backend/Flask",
+            "exception": type(e).__name__,
+            "message": str(e),
+            "stdout": "",
+            "stderr": "",
+            "traceback": "",
+            "exit_code": 500
+        }), 500

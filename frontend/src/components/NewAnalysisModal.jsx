@@ -110,8 +110,46 @@ function NewAnalysisModal({ onClose }) {
 
         <div className="modal-body" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
           {error && (
-            <div style={{ background: 'var(--color-danger-bg)', color: 'var(--color-danger)', padding: '12px', borderRadius: '4px', marginBottom: '16px', fontSize: '14px' }}>
-              {error}
+            <div className="error-panel" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-danger)', borderRadius: 'var(--radius-lg)', padding: '24px', marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--color-danger)' }}>
+                <FiX size={24} />
+                <h3 style={{ fontSize: '18px', margin: 0 }}>Analysis Failed</h3>
+              </div>
+              
+              {typeof error === 'object' ? (
+                <>
+                  <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '8px', fontSize: '14px' }}>
+                    <strong style={{ color: 'var(--color-text-secondary)' }}>Pipeline Stage:</strong>
+                    <span>{error.failed_stage || 'Unknown'}</span>
+                    
+                    <strong style={{ color: 'var(--color-text-secondary)' }}>Reason:</strong>
+                    <span>{error.exception ? `${error.exception}: ${error.message}` : error.message}</span>
+                    
+                    <strong style={{ color: 'var(--color-text-secondary)' }}>Suggestion:</strong>
+                    <span style={{ color: 'var(--color-warning)' }}>
+                      Check if the dataset contains all required columns (Sale_Date, Sales_Amount, Region, etc.) and valid data types.
+                    </span>
+                  </div>
+                  
+                  <details style={{ marginTop: '8px' }}>
+                    <summary style={{ cursor: 'pointer', color: 'var(--color-primary)', fontWeight: 500, userSelect: 'none', marginBottom: '8px' }}>
+                      View Technical Details
+                    </summary>
+                    <div style={{ background: 'var(--color-background)', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', overflowX: 'auto', maxHeight: '250px', overflowY: 'auto' }}>
+                      <strong style={{ fontSize: '12px', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '4px' }}>Traceback:</strong>
+                      <pre style={{ fontSize: '12px', fontFamily: 'monospace', margin: 0, color: 'var(--color-danger)' }}>{error.traceback || error.stderr || "No traceback available."}</pre>
+                    </div>
+                  </details>
+                </>
+              ) : (
+                <p style={{ fontSize: '14px', color: 'var(--color-text)' }}>{error}</p>
+              )}
+              
+              <div style={{ alignSelf: 'flex-start', marginTop: '8px' }}>
+                <button className="primary-button" onClick={() => { setError(null); setCurrentStep(0); }} style={{ background: 'var(--color-danger)' }}>
+                  Retry Upload
+                </button>
+              </div>
             </div>
           )}
 
