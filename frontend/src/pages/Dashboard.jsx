@@ -10,6 +10,7 @@ import RecentActivity from "../components/RecentActivity";
 import SalesChart from "../components/SalesChart";
 import StatCard from "../components/StatCard";
 import { getForecast, getSales } from "../services/salesapi";
+import { useDataset } from "../contexts/DatasetContext";
 import "../styles/Dashboard.css";
 import Layout from "../components/Layout";
 
@@ -18,6 +19,7 @@ const currency = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
 const labelCustomerType = (value) => Number(value) === 0 ? "New" : "Returning";
 
 function Dashboard() {
+  const { activeDataset } = useDataset();
   const [sales, setSales] = useState([]);
   const [forecast, setForecast] = useState([]);
   const [error, setError] = useState("");
@@ -97,49 +99,48 @@ return (
               message={error} 
               onRetry={loadDashboard} 
             />
-          ) : (
-            <>
-              {/* Dataset Metadata Header */}
-              <div style={{ display: 'flex', gap: '24px', padding: '16px 24px', background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', marginBottom: 'var(--space-lg)' }}>
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-md)', background: 'var(--color-primary-light)', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <FiDatabase size={20} />
+              {activeDataset ? (
+                <>
+                  <div style={{ display: 'flex', gap: '24px', padding: '16px 24px', background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', marginBottom: 'var(--space-lg)' }}>
+                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-md)', background: 'var(--color-primary-light)', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <FiDatabase size={20} />
+                      </div>
+                      <div>
+                        <span style={{ display: 'block', fontSize: '11px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Active Dataset</span>
+                        <strong style={{ fontSize: '15px' }}>{activeDataset.name}</strong>
+                      </div>
+                    </div>
+                    <div style={{ width: '1px', background: 'var(--color-border)' }} />
+                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-md)', background: 'var(--color-surface-alt)', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--color-border)' }}>
+                        <FiCheckCircle size={18} />
+                      </div>
+                      <div>
+                        <span style={{ display: 'block', fontSize: '11px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Model Status</span>
+                        <strong style={{ fontSize: '15px', color: 'var(--color-success)' }}>{activeDataset.status}</strong>
+                      </div>
+                    </div>
+                    <div style={{ width: '1px', background: 'var(--color-border)' }} />
+                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-md)', background: 'var(--color-surface-alt)', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--color-border)' }}>
+                        <FiClock size={18} />
+                      </div>
+                      <div>
+                        <span style={{ display: 'block', fontSize: '11px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Last Analysis</span>
+                        <strong style={{ fontSize: '15px' }}>{activeDataset.uploadDate.split(',')[0]}</strong>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <span style={{ display: 'block', fontSize: '11px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Active Dataset</span>
-                    <strong style={{ fontSize: '15px' }}>Q3_Sales_Master.csv</strong>
-                  </div>
-                </div>
-                <div style={{ width: '1px', background: 'var(--color-border)' }} />
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-md)', background: 'var(--color-surface-alt)', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--color-border)' }}>
-                    <FiCheckCircle size={18} />
-                  </div>
-                  <div>
-                    <span style={{ display: 'block', fontSize: '11px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Model Status</span>
-                    <strong style={{ fontSize: '15px', color: 'var(--color-success)' }}>Models Synced</strong>
-                  </div>
-                </div>
-                <div style={{ width: '1px', background: 'var(--color-border)' }} />
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-md)', background: 'var(--color-surface-alt)', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--color-border)' }}>
-                    <FiClock size={18} />
-                  </div>
-                  <div>
-                    <span style={{ display: 'block', fontSize: '11px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Last Analysis</span>
-                    <strong style={{ fontSize: '15px' }}>Today, 09:45 AM</strong>
-                  </div>
-                </div>
-              </div>
 
-              <div className="cards">
-                <StatCard 
-                  title="Total Sales" 
-                  value={`₹ ${currency.format(metrics.totalSales)}`} 
-                  detail="Available sales records" 
-                  icon={FiDollarSign} 
-                  tone="teal"
-                />
+                  <div className="cards">
+                    <StatCard 
+                      title="Total Sales" 
+                      value={`₹ ${currency.format(metrics.totalSales)}`} 
+                      detail="Available sales records" 
+                      icon={FiDollarSign} 
+                      tone="teal"
+                    />
                 <StatCard 
                   title="Net Profit" 
                   value={`₹ ${currency.format(metrics.profit)}`} 
@@ -258,6 +259,8 @@ return (
                   )}
                 </div>
               </section>
+                </>
+              )}
             </>
           )}
         </div>
