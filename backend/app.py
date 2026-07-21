@@ -4,7 +4,7 @@ from flask_cors import CORS
 from routes.sales import sales_bp
 from routes.forecast import forecast_bp
 from routes.churn import churn_bp
-from routes.recommendation import recommend_bp
+from routes.recommendation import recommendation_bp
 from routes.datasets import datasets_bp
 
 app = Flask(__name__)
@@ -15,7 +15,7 @@ CORS(app, resources={r"/*": {"origins": "http://localhost:3001"}})
 app.register_blueprint(sales_bp)
 app.register_blueprint(forecast_bp)
 app.register_blueprint(churn_bp)
-app.register_blueprint(recommend_bp)
+app.register_blueprint(recommendation_bp)
 app.register_blueprint(datasets_bp)
 
 if __name__ == "__main__":

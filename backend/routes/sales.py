@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from services.load_data import sales
+import services.load_data as ld
 
 sales_bp = Blueprint("sales", __name__)
 
@@ -7,5 +7,5 @@ sales_bp = Blueprint("sales", __name__)
 def get_sales():
 
     return jsonify(
-        sales.head(100).to_dict(orient="records")
+        ld.sales.head(100).to_dict(orient="records")
     )
