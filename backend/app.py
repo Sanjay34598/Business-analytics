@@ -1,10 +1,10 @@
 from flask import Flask
 from flask_cors import CORS
 
-from backend.routes.sales import sales_bp
-from backend.routes.forecast import forecast_bp
-from backend.routes.churn import churn_bp
-from backend.routes.recommendation import recommend_bp
+from routes.sales import sales_bp
+from routes.forecast import forecast_bp
+from routes.churn import churn_bp
+from routes.recommendation import recommend_bp
 
 app = Flask(__name__)
 

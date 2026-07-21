@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from backend.services.load_data import churn
+from services.load_data import churn
 
 churn_bp = Blueprint("churn", __name__)
 

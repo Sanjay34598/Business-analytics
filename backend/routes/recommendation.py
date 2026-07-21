@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from backend.services.load_data import recommendation
+from services.load_data import recommendation
 
 recommend_bp = Blueprint("recommend", __name__)
 
