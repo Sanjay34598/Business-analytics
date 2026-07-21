@@ -99,7 +99,9 @@ return (
               message={error} 
               onRetry={loadDashboard} 
             />
-              {activeDataset ? (
+          ) : (
+            <>
+              {activeDataset && (
                 <>
                   <div style={{ display: 'flex', gap: '24px', padding: '16px 24px', background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', marginBottom: 'var(--space-lg)' }}>
                     <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
