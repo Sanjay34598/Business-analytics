@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { FiDatabase, FiUploadCloud, FiTrash2, FiRefreshCw, FiClock, FiFile, FiAlertCircle, FiCheckCircle, FiPlayCircle } from "react-icons/fi";
 import Layout from "../components/Layout";
 import PageHeader from "../components/PageHeader";
@@ -8,6 +9,7 @@ import { useDataset } from "../contexts/DatasetContext";
 import "../styles/Dashboard.css";
 
 function Datasets() {
+  const navigate = useNavigate();
   const { datasets, activeDataset, loading, deleteDataset, activateDataset, analyzeDataset } = useDataset();
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [error, setError] = useState("");
@@ -51,11 +53,9 @@ function Datasets() {
       await activateDataset(id);
       // Then analyze
       await analyzeDataset(id);
-      setSuccess("Analysis complete! Dashboards updated.");
-      setTimeout(() => setSuccess(""), 4000);
+      navigate("/");
     } catch (err) {
       setError(err.message);
-    } finally {
       setActionLoading(false);
     }
   };

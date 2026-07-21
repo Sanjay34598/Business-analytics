@@ -67,6 +67,7 @@ function NewAnalysisModal({ onClose }) {
       } else {
         await fetchDatasets();
         onClose(); // Finish
+        navigate("/"); // Navigate to dashboard without refresh
       }
     } catch (err) {
       setError(err.message);
