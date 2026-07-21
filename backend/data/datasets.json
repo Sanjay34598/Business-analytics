@@ -1,1 +1,12 @@
-[]
+[
+    {
+        "id": "9b34d561-82c3-4ba4-a87b-2271e858d352",
+        "name": "sample_sales_data_1000.csv",
+        "rows": 1000,
+        "columns": 18,
+        "size": "0.16 MB",
+        "uploadDate": "Jul 21, 2026, 07:27 PM",
+        "status": "Processed & Active",
+        "active": true
+    }
+]
