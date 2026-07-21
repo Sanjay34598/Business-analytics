@@ -37,6 +37,7 @@ def upload_dataset():
 def activate_dataset(dataset_id):
     try:
         dataset_info = set_active_dataset(dataset_id)
+        reload_data()
         return jsonify({"message": "Dataset activated successfully", "dataset": dataset_info})
     except ValueError as e:
         return jsonify({"error": str(e)}), 404
@@ -144,6 +145,13 @@ def analyze_dataset():
                     "traceback": "",
                     "exit_code": 1
                 }), 500
+                
+        # Backup processed files for dataset switching
+        import shutil
+        dataset_processed_dir = os.path.join(project_root, "backend", "data", "processed", dataset_id)
+        os.makedirs(dataset_processed_dir, exist_ok=True)
+        for f in required_files:
+            shutil.copy2(os.path.join(processed_dir, f), os.path.join(dataset_processed_dir, f))
                 
         # Reload data
         reload_data()

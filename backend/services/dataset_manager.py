@@ -84,6 +84,15 @@ def set_active_dataset(dataset_id):
     os.makedirs(os.path.dirname(ml_raw_sales_file), exist_ok=True)
     shutil.copy2(source_path, ml_raw_sales_file)
     
+    # Restore processed files if dataset was already completed
+    dataset_processed_dir = os.path.join(data_dir, "processed", dataset_id)
+    ml_processed_dir = os.path.join(base_dir, "ml", "data", "processed")
+    if os.path.exists(dataset_processed_dir):
+        os.makedirs(ml_processed_dir, exist_ok=True)
+        for f in os.listdir(dataset_processed_dir):
+            if f.endswith(".csv"):
+                shutil.copy2(os.path.join(dataset_processed_dir, f), os.path.join(ml_processed_dir, f))
+    
     _save_registry(registry)
     return dataset_info
 
