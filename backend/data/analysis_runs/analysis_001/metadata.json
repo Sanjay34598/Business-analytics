@@ -1,7 +1,7 @@
 {
     "analysis_id": "analysis_001",
     "dataset_name": "dataset_a.csv",
-    "status": "Completed",
+    "status": "Processing...",
     "rows": 5000,
     "columns": 18,
     "uploaded_at": "Jul 21, 2026, 09:59 PM",
@@ -10,7 +10,7 @@
     "churn_accuracy": "92.1%",
     "recommendation_score": "0.88",
     "algorithm": "Linear Regression / Random Forest",
-    "model_version": "v1",
+    "model_version": "v2",
     "training_time": "0s",
     "processing_time": "0s",
     "last_opened": "2026-07-21 21:59:23"

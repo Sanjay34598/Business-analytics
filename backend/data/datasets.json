@@ -6,10 +6,10 @@
         "name": "dataset_a.csv",
         "created_at": "Jul 21, 2026, 09:59 PM",
         "uploadDate": "Jul 21, 2026, 09:59 PM",
-        "status": "Completed",
+        "status": "Processing...",
         "rows": 5000,
         "columns": 18,
-        "model_version": "v1",
+        "model_version": "v2",
         "accuracy": "89.5%"
     },
     {
@@ -19,10 +19,10 @@
         "name": "dataset_b.csv",
         "created_at": "Jul 21, 2026, 10:00 PM",
         "uploadDate": "Jul 21, 2026, 10:00 PM",
-        "status": "Processing...",
+        "status": "Completed",
         "rows": 5000,
         "columns": 18,
         "model_version": "v1",
-        "accuracy": "N/A"
+        "accuracy": "89.5%"
     }
 ]
