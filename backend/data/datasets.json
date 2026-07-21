@@ -6,7 +6,7 @@
         "name": "dataset_a.csv",
         "created_at": "Jul 21, 2026, 09:59 PM",
         "uploadDate": "Jul 21, 2026, 09:59 PM",
-        "status": "Processing...",
+        "status": "Completed",
         "rows": 5000,
         "columns": 18,
         "model_version": "v2",

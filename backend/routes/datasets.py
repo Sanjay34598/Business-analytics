@@ -42,6 +42,9 @@ def upload_dataset():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+import logging
+logger = logging.getLogger(__name__)
+
 @datasets_bp.route("/datasets/<dataset_id>/retrain", methods=["POST"])
 def retrain_dataset(dataset_id):
     try:
@@ -61,15 +64,7 @@ def retrain_dataset(dataset_id):
         
         return analyze_dataset_core(dataset_id)
     except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
-
-@datasets_bp.route("/datasets/<dataset_id>/active", methods=["PUT"])
-def activate_dataset_endpoint(dataset_id):
-    try:
-        set_active_analysis(dataset_id)
-        return jsonify({"message": "Active dataset updated", "active_analysis": dataset_id})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"success": False, "reason": str(e), "message": str(e)}), 500
 
 @datasets_bp.route("/datasets/<dataset_id>", methods=["DELETE"])
 def remove_dataset(dataset_id):
@@ -83,19 +78,45 @@ def remove_dataset(dataset_id):
         return jsonify({"error": str(e)}), 500
 
 def analyze_dataset_core(dataset_id):
-    if dataset_id:
-        update_dataset_status(dataset_id, "Processing...")
-        
+    if not dataset_id:
+        logger.error("[DATASET ANALYZE] Pipeline Failed. Dataset ID missing.")
+        return jsonify({"success": False, "reason": "dataset_id missing"}), 400
+
+    logger.info(f"[DATASET ANALYZE] Dataset ID: {dataset_id}")
+
+    # 1. Verify dataset exists in registry (datasets.json)
+    all_datasets = get_datasets()
+    dataset_entry = next((d for d in all_datasets if d.get("id") == dataset_id or d.get("analysis_id") == dataset_id), None)
+    if not dataset_entry:
+        logger.error(f"[DATASET ANALYZE] Pipeline Failed. Dataset ID: {dataset_id} not found in registry")
+        return jsonify({"success": False, "reason": "dataset not found in registry"}), 404
+
+    # 2. Verify analysis directory
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(os.path.dirname(current_dir))
+    analysis_dir = os.path.join(project_root, "backend", "data", "analysis_runs", dataset_id)
+
+    logger.info(f"[DATASET ANALYZE] Analysis Directory: {analysis_dir}")
+
+    if not os.path.exists(analysis_dir):
+        logger.error(f"[DATASET ANALYZE] Pipeline Failed. Dataset ID: {dataset_id} analysis directory missing: {analysis_dir}")
+        return jsonify({"success": False, "reason": "analysis directory missing"}), 404
+
+    # 3. Verify uploaded.csv exists
+    uploaded_csv = os.path.join(analysis_dir, "dataset", "uploaded.csv")
+    if not os.path.exists(uploaded_csv) or os.path.getsize(uploaded_csv) == 0:
+        logger.error(f"[DATASET ANALYZE] Pipeline Failed. Dataset ID: {dataset_id} uploaded.csv missing at: {uploaded_csv}")
+        return jsonify({"success": False, "reason": "uploaded.csv missing"}), 404
+
+    # 4. Update status to Training
+    update_dataset_status(dataset_id, "Training")
+    current_meta = get_analysis_metadata(dataset_id) or {}
+    logger.info(f"[DATASET ANALYZE] Dataset Status: Training")
+
+    # 5. Execute ML Pipeline
+    logger.info(f"[DATASET ANALYZE] Pipeline Started for Dataset ID: {dataset_id}")
+
     try:
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        project_root = os.path.dirname(os.path.dirname(current_dir))
-        
-        # Determine analysis directory
-        analysis_dir = os.path.join(project_root, "backend", "data", "analysis_runs", dataset_id)
-        
-        if not os.path.exists(analysis_dir):
-            return jsonify({"success": False, "message": f"Dataset analysis directory missing: {dataset_id}"}), 404
-        
         env = os.environ.copy()
         env["ANALYSIS_DIR"] = analysis_dir
 
@@ -109,6 +130,7 @@ def analyze_dataset_core(dataset_id):
         
         if result.returncode != 0:
             update_dataset_status(dataset_id, "Failed")
+            logger.error(f"[DATASET ANALYZE] Pipeline Failed for Dataset ID: {dataset_id}. Exit code: {result.returncode}")
             
             stderr = result.stderr or ""
             stdout = result.stdout or ""
@@ -134,6 +156,7 @@ def analyze_dataset_core(dataset_id):
 
             return jsonify({
                 "success": False,
+                "reason": message,
                 "failed_stage": failed_stage,
                 "exception": exception_type,
                 "message": message,
@@ -156,8 +179,10 @@ def analyze_dataset_core(dataset_id):
             file_path = os.path.join(processed_dir, f)
             if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
                 update_dataset_status(dataset_id, "Failed")
+                logger.error(f"[DATASET ANALYZE] Pipeline Failed for Dataset ID: {dataset_id}. Missing output file: {f}")
                 return jsonify({
                     "success": False,
+                    "reason": f"Required output file missing or empty: {f}",
                     "failed_stage": "File Verification",
                     "exception": "FileNotFoundError",
                     "message": f"Required output file is missing or empty: {f}",
@@ -184,8 +209,10 @@ def analyze_dataset_core(dataset_id):
 
         if sales_len == 0 or forecast_len == 0 or churn_len == 0 or rec_len == 0:
             update_dataset_status(dataset_id, "Failed")
+            logger.error(f"[DATASET ANALYZE] Pipeline Failed for Dataset ID: {dataset_id}. Data validation empty.")
             return jsonify({
                 "success": False,
+                "reason": "One or more processed datasets returned 0 rows.",
                 "failed_stage": "Data Validation",
                 "exception": "EmptyDataFrameError",
                 "message": "One or more processed datasets returned 0 rows.",
@@ -216,11 +243,13 @@ def analyze_dataset_core(dataset_id):
             "trained_at": training_date,
             "forecast_accuracy": forecast_acc,
             "churn_accuracy": churn_acc,
-            "recommendation_score": rec_score
+            "recommendation_score": rec_score,
+            "model_version": current_meta.get("model_version", "v1")
         }
 
         update_dataset_status(dataset_id, "Completed", extra_meta=extra_meta)
         invalidate_cache(dataset_id)
+        logger.info(f"[DATASET ANALYZE] Pipeline Finished for Dataset ID: {dataset_id}")
             
         return jsonify({
             "success": True,
@@ -239,9 +268,11 @@ def analyze_dataset_core(dataset_id):
         
     except Exception as e:
         update_dataset_status(dataset_id, "Failed")
+        logger.error(f"[DATASET ANALYZE] Pipeline Failed for Dataset ID: {dataset_id}. Exception: {str(e)}")
         import traceback
         return jsonify({
             "success": False,
+            "reason": str(e),
             "failed_stage": "Backend/Flask",
             "exception": type(e).__name__,
             "message": str(e),
@@ -249,7 +280,9 @@ def analyze_dataset_core(dataset_id):
         }), 500
 
 @datasets_bp.route("/datasets/analyze", methods=["POST"])
+@datasets_bp.route("/api/datasets/analyze", methods=["POST"])
 def analyze_dataset():
     data = request.json or {}
     dataset_id = data.get("dataset_id")
     return analyze_dataset_core(dataset_id)
+

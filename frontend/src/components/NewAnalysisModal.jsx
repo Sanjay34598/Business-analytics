@@ -18,7 +18,7 @@ function NewAnalysisModal({ onClose }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState("");
 
-  const { uploadDataset, activateDataset, analyzeDataset, fetchDatasets } = useDataset();
+  const { uploadDataset, analyzeDataset, selectDataset, fetchDatasets } = useDataset();
 
   const handleNext = async () => {
     setError("");
@@ -50,12 +50,11 @@ function NewAnalysisModal({ onClose }) {
           
           // Auto start processing
           setIsProcessing(true);
-          await activateDataset(ds.id);
           await analyzeDataset(ds.id);
           setIsProcessing(false);
           setCurrentStep(5);
         } catch (err) {
-          setError(err.message);
+          setError(err);
           setIsUploading(false);
           setIsProcessing(false);
         }
@@ -70,7 +69,7 @@ function NewAnalysisModal({ onClose }) {
         navigate("/"); // Navigate to dashboard without refresh
       }
     } catch (err) {
-      setError(err.message);
+      setError(err);
     }
   };
 
@@ -127,7 +126,9 @@ function NewAnalysisModal({ onClose }) {
                     <span>{error.failed_stage || 'Unknown'}</span>
                     
                     <strong style={{ color: 'var(--color-text-secondary)' }}>Reason:</strong>
-                    <span>{error.exception ? `${error.exception}: ${error.message}` : error.message}</span>
+                    <span style={{ color: 'var(--color-danger)', fontWeight: 600 }}>
+                      {error.reason || (error.exception ? `${error.exception}: ${error.message}` : error.message || "Unknown error")}
+                    </span>
                     
                     <strong style={{ color: 'var(--color-text-secondary)' }}>Suggestion:</strong>
                     <span style={{ color: 'var(--color-warning)' }}>

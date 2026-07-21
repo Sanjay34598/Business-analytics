@@ -1,11 +1,11 @@
 {
     "analysis_id": "analysis_001",
     "dataset_name": "dataset_a.csv",
-    "status": "Processing...",
+    "status": "Completed",
     "rows": 5000,
     "columns": 18,
     "uploaded_at": "Jul 21, 2026, 09:59 PM",
-    "trained_at": "Jul 21, 2026, 10:00 PM",
+    "trained_at": "Jul 21, 2026, 10:03 PM",
     "forecast_accuracy": "89.5%",
     "churn_accuracy": "92.1%",
     "recommendation_score": "0.88",

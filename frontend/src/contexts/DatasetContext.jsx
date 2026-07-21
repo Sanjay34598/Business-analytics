@@ -60,18 +60,9 @@ export const DatasetProvider = ({ children }) => {
     return data.dataset;
   };
 
-  const activateDataset = async (id) => {
+  const selectDataset = (id) => {
     const targetDataset = datasets.find(d => (d.analysis_id === id || d.id === id));
-    if (!targetDataset || targetDataset.status !== "Completed") {
-      throw new Error("Dataset is not ready to be activated");
-    }
-    
-    try {
-      await fetch(`/datasets/${id}/active`, { method: "PUT" });
-    } catch (e) {
-      console.error("Failed to sync active dataset to backend config:", e);
-    }
-
+    if (!targetDataset) return;
     localStorage.setItem("activeDatasetId", id);
     setActiveDataset(targetDataset);
   };
@@ -90,8 +81,8 @@ export const DatasetProvider = ({ children }) => {
   };
 
   const analyzeDataset = async (id) => {
-    // Optimistically update status to Processing...
-    setDatasets(prev => prev.map(d => d.id === id ? { ...d, status: "Processing..." } : d));
+    // Optimistically update status to Training
+    setDatasets(prev => prev.map(d => d.id === id ? { ...d, status: "Training" } : d));
     
     const res = await fetch("/datasets/analyze", {
       method: "POST",
@@ -102,14 +93,16 @@ export const DatasetProvider = ({ children }) => {
     });
     
     if (!res.ok) {
-      const errorData = await res.json();
+      const errorData = await res.json().catch(() => ({ reason: "Failed to parse error response" }));
       await fetchDatasets();
-      // Throw the object so the caller can display detailed error info
+      // Throw the error payload containing explicit reason
       throw errorData;
     }
     
+    const resultData = await res.json();
     await fetchDatasets();
-    return await res.json();
+    selectDataset(id);
+    return resultData;
   };
 
   return (
@@ -120,7 +113,7 @@ export const DatasetProvider = ({ children }) => {
         loading,
         fetchDatasets,
         uploadDataset,
-        activateDataset,
+        selectDataset,
         deleteDataset,
         analyzeDataset
       }}

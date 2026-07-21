@@ -3,7 +3,7 @@ import { FiDatabase, FiChevronDown, FiSearch, FiCheck, FiX, FiAlertCircle } from
 import { useDataset } from "../contexts/DatasetContext";
 
 function DatasetSwitcher() {
-  const { datasets, activeDataset, activateDataset } = useDataset();
+  const { datasets, activeDataset, selectDataset } = useDataset();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [loadingId, setLoadingId] = useState(null);
@@ -29,20 +29,16 @@ function DatasetSwitcher() {
     return filtered.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
   }, [datasets, searchQuery]);
 
-  const handleSelect = async (id) => {
+  const handleSelect = (id) => {
     if (id === activeDataset?.id) {
       setIsOpen(false);
       return;
     }
-    setLoadingId(id);
     try {
-      await activateDataset(id);
+      selectDataset(id);
       setIsOpen(false);
     } catch (err) {
       console.error(err);
-      alert("Failed to switch dataset: " + err.message);
-    } finally {
-      setLoadingId(null);
     }
   };
 
