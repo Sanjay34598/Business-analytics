@@ -46,6 +46,15 @@ app.register_blueprint(recommendation_bp)
 app.register_blueprint(datasets_bp)
 app.register_blueprint(reports_bp)
 
+@app.route("/health", methods=["GET"])
+@app.route("/api/health", methods=["GET"])
+def health_check():
+    return jsonify({
+        "status": "healthy",
+        "service": "business-analytics-api",
+        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat()
+    }), 200
+
 # Global Error Handler returning structured JSON
 @app.errorhandler(Exception)
 def handle_global_exception(e):
@@ -59,8 +68,8 @@ def handle_global_exception(e):
     }), status_code
 
 if __name__ == "__main__":
-    host = os.getenv("HOST", "127.0.0.1")
+    host = os.getenv("HOST", "0.0.0.0")
     port = int(os.getenv("PORT", 5000))
-    debug = os.getenv("FLASK_DEBUG", "1") == "1"
+    debug = os.getenv("FLASK_DEBUG", "0") == "1"
     logger.info(f"Starting Business Analytics Flask Server on {host}:{port} (debug={debug})")
     app.run(host=host, port=port, debug=debug)
