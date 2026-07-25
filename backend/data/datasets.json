@@ -50,5 +50,44 @@
         "columns": 18,
         "model_version": "v1",
         "accuracy": "89.5%"
+    },
+    {
+        "analysis_id": "analysis_005",
+        "id": "analysis_005",
+        "dataset_name": "test_lifecycle.csv",
+        "name": "test_lifecycle.csv",
+        "created_at": "Jul 25, 2026, 08:25 AM",
+        "uploadDate": "Jul 25, 2026, 08:25 AM",
+        "status": "Training",
+        "rows": 5000,
+        "columns": 18,
+        "model_version": "v1",
+        "accuracy": "N/A"
+    },
+    {
+        "analysis_id": "analysis_006",
+        "id": "analysis_006",
+        "dataset_name": "dataset_a.csv",
+        "name": "dataset_a.csv",
+        "created_at": "Jul 25, 2026, 08:25 AM",
+        "uploadDate": "Jul 25, 2026, 08:25 AM",
+        "status": "Uploaded",
+        "rows": 5000,
+        "columns": 18,
+        "model_version": "v1",
+        "accuracy": "N/A"
+    },
+    {
+        "analysis_id": "analysis_007",
+        "id": "analysis_007",
+        "dataset_name": "dataset_a.csv",
+        "name": "dataset_a.csv",
+        "created_at": "Jul 25, 2026, 08:25 AM",
+        "uploadDate": "Jul 25, 2026, 08:25 AM",
+        "status": "Training",
+        "rows": 100,
+        "columns": 23,
+        "model_version": "v1",
+        "accuracy": "N/A"
     }
 ]
