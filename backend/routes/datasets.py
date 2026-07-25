@@ -1,7 +1,13 @@
-from flask import Blueprint, request, jsonify
 import os
-import subprocess
+import re
+import json
+import logging
 import datetime
+import subprocess
+import traceback
+import pandas as pd
+from flask import Blueprint, request, jsonify
+
 from services.dataset_manager import (
     get_datasets,
     add_dataset,
@@ -14,6 +20,7 @@ from services.dataset_manager import (
 from services.load_data import invalidate_cache
 
 datasets_bp = Blueprint("datasets", __name__)
+logger = logging.getLogger(__name__)
 
 @datasets_bp.route("/datasets", methods=["GET"])
 def list_datasets():
@@ -41,9 +48,6 @@ def upload_dataset():
         return jsonify({"message": "Dataset uploaded successfully", "dataset": dataset_info})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-import logging
-logger = logging.getLogger(__name__)
 
 @datasets_bp.route("/datasets/<dataset_id>/retrain", methods=["POST"])
 def retrain_dataset(dataset_id):
