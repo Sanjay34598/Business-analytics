@@ -55,7 +55,6 @@ function Dashboard() {
       setForecast(data.forecast || []);
       setRecommendations(data.recommendations || []);
       setModelMetrics(data.report || {});
-      setDashboardMeta(data.analysis || {});
     } catch (requestError) {
       setError(requestError.message || "Unable to load dashboard data.");
     } finally {
