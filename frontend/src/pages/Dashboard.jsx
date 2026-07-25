@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Doughnut } from "react-chartjs-2";
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
-import { FiActivity, FiBox, FiDollarSign, FiPercent, FiShoppingBag, FiTrendingUp, FiDatabase, FiClock, FiCheckCircle, FiRefreshCw } from "react-icons/fi";
+import { FiActivity, FiBox, FiDollarSign, FiPercent, FiShoppingBag, FiTrendingUp, FiRefreshCw } from "react-icons/fi";
 import ForecastChart from "../components/ForecastChart";
 import Loader from "../components/Loader";
 import ErrorState from "../components/ErrorState";
@@ -9,7 +9,7 @@ import PageHeader from "../components/PageHeader";
 import RecentActivity from "../components/RecentActivity";
 import SalesChart from "../components/SalesChart";
 import StatCard from "../components/StatCard";
-import { getDashboardData, getForecast, getSales, getRecommendations, getMetrics, retrainDataset } from "../services/salesapi";
+import { getDashboardData, retrainDataset } from "../services/salesapi";
 import { useDataset } from "../contexts/DatasetContext";
 import "../styles/Dashboard.css";
 import Layout from "../components/Layout";
@@ -42,8 +42,6 @@ function Dashboard() {
       setRetraining(false);
     }
   };
-
-  const [dashboardMeta, setDashboardMeta] = useState(null);
 
   const loadDashboard = useCallback(async () => {
     setLoading(true);

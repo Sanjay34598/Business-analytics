@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { FiBarChart2, FiBox, FiFileText, FiGrid, FiTrendingUp, FiUsers, FiDatabase, FiSettings, FiChevronLeft, FiChevronRight, FiX } from "react-icons/fi";
 import "../styles/Sidebar.css";
