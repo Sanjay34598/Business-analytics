@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { getApiData } from "../services/api";
 
-const API_BASE = process.env.REACT_APP_API_URL || "";
+const API_BASE = (process.env.REACT_APP_API_URL || process.env.REACT_APP_API_BASE_URL || "https://web-production-71f38.up.railway.app").replace(/\/+$/, "");
 
 const DatasetContext = createContext();
 
