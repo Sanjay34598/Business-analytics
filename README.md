@@ -101,6 +101,23 @@ Traditional business intelligence tools often require complex ETL pipelines, spe
 
 ---
 
+## 🚀 Live Demo
+
+| Service | Link |
+|---------|------|
+| 🌐 Frontend (Vercel) | https://business-analytics-tan.vercel.app |
+| ⚙️ Backend API (Railway) | https://web-production-71f38.up.railway.app/health |
+
+---
+
+## 🎥 Demo Video
+
+Watch the complete application demo here:
+
+**▶️ Demo:** *(Paste your YouTube/Drive/LinkedIn video link here)*
+
+---
+
 ## Architecture
 
 ```
@@ -299,29 +316,54 @@ cd ..
 
 ## Screenshots
 
-> *Note: Below are placeholders for visual assets. See [screenshots/README.md](file:///screenshots/README.md) for capturing guidelines.*
+### Executive Dashboard
 
-### Executive BI Dashboard
-![Dashboard Overview](screenshots/dashboard_overview.png)
-*Real-time executive KPIs, gross revenue trends, and regional performance.*
-
-### Dataset Management & Switching
-![Dataset Management](screenshots/dataset_management.png)
-*Upload new CSVs, manage active datasets, and trigger automated pipeline runs.*
-
-### Predictive Sales Forecasting
-![Forecast Analytics](screenshots/forecast_analytics.png)
-*Time-series machine learning forecast with lower and upper confidence intervals.*
-
-### Executive Reports & Export
-![Reports Generator](screenshots/reports_analytics.png)
-*Single-click executive PDF report generation and metric breakdown.*
-
-### Settings & System Config
-![Settings Overview](screenshots/settings_overview.png)
-*Application configuration, model defaults, and active environment status.*
+![Dashboard](screenshots/dashboard.png)
 
 ---
+
+### Sales Analytics
+
+![Sales](screenshots/sales.png)
+
+---
+
+### Sales Forecast
+
+![Forecast](screenshots/forecast.png)
+
+---
+
+### Customer Analytics
+
+![Customer](screenshots/customer.png)
+
+---
+
+### Product Recommendations
+
+![Recommendation](screenshots/recommendation.png)
+
+---
+
+### Reports
+
+![Reports](screenshots/reports.png)
+
+---
+
+### Dataset Management
+
+![Datasets](screenshots/datasets.png)
+
+## Live Deployment
+
+Frontend:
+https://business-analytics-tan.vercel.app
+
+Backend Health Check:
+https://web-production-71f38.up.railway.app/health
+
 
 ## Future Improvements
 
@@ -362,5 +404,7 @@ This project is licensed under the **MIT License** — see the [LICENSE](file://
 
 ## Author
 
-**Enterprise Machine Learning & Business Analytics Team**  
-*Built for portfolio, enterprise BI, and high-performance ML showcases.*
+**Sanjay**
+
+- GitHub: https://github.com/Sanjay34598
+- LinkedIn: https://www.linkedin.com/in/nallasanjay/
