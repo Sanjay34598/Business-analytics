@@ -1,131 +1,90 @@
-# Deployment Guide
+# Deployment Manual
 
-This guide describes how to deploy the **Business Analytics Platform** in both local development environments and production settings using standard WSGI servers and static file web servers.
-
----
-
-## 1. Local Development Setup
-
-### Prerequisites
-- Python 3.10+
-- Node.js 18+ and `npm` 9+
-- Git
-
-### Step-by-Step Instructions
-
-1. **Clone Repository**:
-   ```bash
-   git clone https://github.com/your-username/Business-analytics.git
-   cd Business-analytics
-   ```
-
-2. **Backend Setup**:
-   ```bash
-   python -m venv venv
-   # On Windows:
-   venv\Scripts\activate
-   # On Linux/macOS:
-   source venv/bin/activate
-
-   pip install -r requirements.txt
-   ```
-
-3. **Frontend Setup**:
-   ```bash
-   cd frontend
-   npm install
-   ```
-
-4. **Start Backend Server**:
-   ```bash
-   # From project root with virtualenv active
-   python backend/app.py
-   ```
-   *Runs on `http://127.0.0.1:5000`*
-
-5. **Start Frontend Server**:
-   ```bash
-   # In frontend/ directory
-   npm start
-   ```
-   *Runs on `http://localhost:3000` or `http://localhost:3001`*
+This document provides step-by-step instructions for deploying the **Business Analytics Platform** across local development, Docker containers, Render, Vercel, and production Gunicorn/Nginx infrastructure.
 
 ---
 
-## 2. Production Deployment
+## Deployment Options Matrix
 
-### Backend Deployment (Gunicorn / Waitress)
+| Deployment Target | Environment | Configuration Manifest | Production Readiness |
+|-------------------|-------------|------------------------|----------------------|
+| **Docker Compose**| Containerized | `Dockerfile`, `docker-compose.yml` | High (One-command setup) |
+| **Render** | Cloud PaaS | `render.yaml` | High (Auto-deploy on push) |
+| **Vercel + Render** | Hybrid (Frontend + Backend) | `vercel.json`, `render.yaml` | High (Global CDN + API) |
+| **Heroku** | PaaS | `Procfile`, `runtime.txt` | Medium |
+| **Linux VM (Nginx + Gunicorn)** | Bare Metal / VPS | `gunicorn.conf.py`, Nginx config | Enterprise Production |
 
-For production Linux environments, use **Gunicorn** WSGI server behind an Nginx reverse proxy:
+---
+
+## 1. One-Command Docker Setup
 
 ```bash
-pip install gunicorn
+# Clone repository
+git clone https://github.com/your-username/Business-analytics.git
+cd Business-analytics
 
-# Run Gunicorn from root directory
-gunicorn --workers 4 --bind 127.0.0.1:5000 backend.app:app
+# Build and start containerized application
+docker-compose up --build
 ```
 
-For Windows production environments, use **Waitress**:
-
-```bash
-pip install waitress
-
-# Run Waitress server
-waitress-serve --port=5000 backend.app:app
-```
+Access the application at `http://localhost:5000`.
 
 ---
 
-### Frontend Production Build
+## 2. Render Deployment (`render.yaml`)
 
-Compile the React frontend into static HTML/JS/CSS assets:
-
-```bash
-cd frontend
-npm run build
-```
-
-This creates an optimized production bundle in `frontend/build/`.
+1. Connect your GitHub repository to Render.
+2. Select **New Blueprint Instance**.
+3. Point Render to `render.yaml`. Render automatically provisions:
+   - Python 3.11 web service executing `gunicorn -c gunicorn.conf.py backend.app:app`.
+   - Static React site serving frontend assets.
 
 ---
 
-### Nginx Reverse Proxy Configuration Example
+## 3. Vercel Frontend Deployment (`vercel.json`)
 
+1. Push your code to GitHub.
+2. Import the project into Vercel.
+3. Vercel automatically detects `vercel.json` and builds the SPA using `frontend/package.json`.
+4. Set the environment variable:
+   `REACT_APP_API_URL=https://your-render-backend-url.onrender.com`
+
+---
+
+## 4. Production Gunicorn + Nginx Setup (Ubuntu/Debian)
+
+### Install Dependencies
+```bash
+sudo apt update && sudo apt install -y python3-pip python3-venv nginx
+```
+
+### Setup Backend Service
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt gunicorn
+
+# Test Gunicorn startup
+gunicorn -c gunicorn.conf.py backend.app:app
+```
+
+### Configure Nginx Reverse Proxy
 ```nginx
 server {
     listen 80;
-    server_name analytics.yourcompany.com;
+    server_name analytics.yourdomain.com;
 
-    # Serve React Static Frontend
     location / {
         root /var/www/business-analytics/frontend/build;
         index index.html;
         try_files $uri $uri/ /index.html;
     }
 
-    # Proxy Flask Backend API Requests
     location /api/ {
         proxy_pass http://127.0.0.1:5000/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 ```
-
----
-
-## 3. Environment Variables Configuration
-
-Copy `.env.example` to `.env` and adjust settings:
-
-```bash
-cp .env.example .env
-```
-
-Key Production Variables:
-- `FLASK_ENV=production`
-- `FLASK_DEBUG=0`
-- `CORS_ORIGINS=https://analytics.yourcompany.com`
-- `REACT_APP_API_BASE_URL=https://analytics.yourcompany.com/api`

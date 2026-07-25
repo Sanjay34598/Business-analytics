@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: business-analytics-app
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - FLASK_DEBUG=0
+      - HOST=0.0.0.0
+      - PORT=5000
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:5000
+    volumes:
+      - ./backend/data/analysis_runs:/app/backend/data/analysis_runs
+      - ./backend/data/uploads:/app/backend/data/uploads
+      - ./logs:/app/logs
+    restart: unless-stopped

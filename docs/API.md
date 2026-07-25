@@ -1,240 +1,171 @@
-# REST API Documentation
+# REST API Reference Documentation
 
-The **Business Analytics Platform** exposes a comprehensive RESTful API via Flask Blueprints. All endpoints return JSON responses and support CORS requests from the React frontend interface.
-
----
-
-## Base URL
-
-`http://127.0.0.1:5000`
+The **Business Analytics Platform** provides a structured RESTful API. Every API response follows standard HTTP status code conventions and returns structured JSON responses.
 
 ---
 
-## Endpoint Summary Table
+## Standard JSON Error Response Format
 
-| Category | Endpoint | Method | Description |
-|----------|----------|--------|-------------|
-| **Datasets** | `/datasets` | `GET` | Retrieve list of all uploaded datasets. |
-| **Datasets** | `/datasets/upload` | `POST` | Upload a new CSV dataset file. |
-| **Datasets** | `/datasets/analyze` | `POST` | Execute ML analysis pipeline for a dataset. |
-| **Datasets** | `/datasets/set-active` | `POST` | Switch active dataset for global views. |
-| **Datasets** | `/datasets/<id>/retrain` | `POST` | Retrain ML pipeline and increment model version. |
-| **Datasets** | `/datasets/<id>` | `DELETE` | Remove dataset file and associated analysis artifacts. |
-| **Executive** | `/dashboard/kpis` | `GET` | Fetch top-level executive KPIs (Revenue, Profit, Orders, Margin). |
-| **Sales** | `/sales/overview` | `GET` | Retrieve sales breakdown by channel, category, region, and time. |
-| **Forecast** | `/forecast` | `GET` | Retrieve time-series historical & predicted sales forecast data. |
-| **Churn** | `/churn` | `GET` | Fetch customer churn risk classification & retention metrics. |
-| **Recommendations** | `/recommendation` | `GET` | Fetch product cross-selling & association rules. |
-| **Reports** | `/reports/summary` | `GET` | Retrieve executive textual summary and key highlights. |
+All error responses (`4xx` and `5xx`) return the following structured JSON schema:
+
+```json
+{
+  "success": false,
+  "message": "Human readable error summary",
+  "reason": "ExceptionClassName",
+  "timestamp": "2026-07-25T08:35:19Z"
+}
+```
 
 ---
 
-## Endpoint Details & Payload Specifications
+## API Endpoints Reference
 
-### 1. Datasets Management
+### 1. Executive Dashboard
+#### `GET /api/dashboard`
+Returns complete executive metrics, KPIs, sales summaries, and model reports.
 
-#### `GET /datasets`
-Retrieves all registered datasets in the system.
+- **Parameters**:
+  - `analysis_id` (Query string, optional): Target analysis ID (e.g. `ds_20260725_1001`). Defaults to active dataset.
+- **Status Codes**:
+  - `200 OK`: Data loaded successfully.
+  - `404 Not Found`: Dataset or analysis run missing.
+- **Example Response**:
+```json
+{
+  "analysis": {
+    "analysis_id": "ds_20260725_1001",
+    "status": "Completed",
+    "dataset_name": "Medium.csv",
+    "model_version": "v1"
+  },
+  "kpis": {
+    "total_sales": 4859201.45,
+    "total_orders": 500,
+    "avg_order_value": 9718.40,
+    "total_profit": 1204910.12,
+    "total_customers": 320,
+    "churn_risk_count": 42
+  }
+}
+```
 
-**Response `200 OK`**:
+---
+
+### 2. Sales Analytics
+#### `GET /api/sales`
+Returns transaction aggregations grouped by channel, category, region, and sales rep.
+
+- **Parameters**:
+  - `analysis_id` (Query string, optional)
+- **Status Codes**: `200 OK`, `404 Not Found`
+- **Example Response**:
 ```json
 [
   {
-    "id": "ds_20260725_1001",
-    "name": "Medium.csv",
-    "upload_date": "2026-07-25 08:30:00",
-    "status": "ready",
-    "is_active": true,
-    "rows": 500,
-    "analysis_id": "ds_20260725_1001"
+    "Order ID": "ORD-100001",
+    "Sale_Date": "2024-10-16",
+    "Sales_Amount": 5735.63,
+    "Profit": 643.45,
+    "Sales_Channel": "Retail",
+    "Product_Category": "Office Supplies"
   }
 ]
 ```
 
 ---
 
-#### `POST /datasets/upload`
-Uploads a raw sales transaction CSV file.
+### 3. Sales Forecasting
+#### `GET /api/forecast`
+Returns time-series historical data and machine learning predictions with confidence bounds.
 
-**Request**: `multipart/form-data`
-- `file`: CSV file attachment
-
-**Response `200 OK`**:
+- **Parameters**:
+  - `analysis_id` (Query string, optional)
+- **Status Codes**: `200 OK`, `404 Not Found`
+- **Example Response**:
 ```json
-{
-  "message": "Dataset uploaded successfully",
-  "dataset": {
-    "id": "ds_20260725_1002",
-    "name": "Sales_Q3_2026.csv",
-    "upload_date": "2026-07-25 08:35:12",
-    "status": "pending",
-    "is_active": false
+[
+  {
+    "Date": "2025-01-01",
+    "Actual_Sales": 410000.00,
+    "Predicted_Sales": 412500.00,
+    "Lower_Bound": 389000.00,
+    "Upper_Bound": 436000.00
   }
-}
+]
 ```
 
 ---
 
-#### `POST /datasets/analyze`
-Triggers full asynchronous execution of the machine learning pipeline on a target dataset.
+### 4. Customer Segmentation & Churn
+#### `GET /api/customers`
+Returns customer RFM classifications, transaction counts, and churn risk scores.
 
-**Request Body**:
+- **Parameters**:
+  - `analysis_id` (Query string, optional)
+- **Status Codes**: `200 OK`, `404 Not Found`
+- **Example Response**:
 ```json
-{
-  "dataset_id": "ds_20260725_1002"
-}
-```
-
-**Response `200 OK`**:
-```json
-{
-  "success": true,
-  "message": "Analysis executed successfully",
-  "analysis_id": "ds_20260725_1002",
-  "metrics": {
-    "rows_processed": 500,
-    "total_sales": 4859201.45,
-    "total_profit": 1204910.12,
-    "models_evaluated": ["forecasting", "churn", "recommendations"]
+[
+  {
+    "Customer ID": "CUST-9935",
+    "Recency": 14,
+    "Frequency": 8,
+    "Monetary": 14200.50,
+    "Cluster": "VIP",
+    "Churn_Risk": "Low"
   }
-}
+]
 ```
 
 ---
 
-#### `POST /datasets/set-active`
-Sets the globally selected active dataset for dashboard visualization.
+### 5. Product Recommendations
+#### `GET /api/recommendations`
+Returns product association rules and cross-selling lift scores.
 
-**Request Body**:
+- **Parameters**:
+  - `analysis_id` (Query string, optional)
+- **Status Codes**: `200 OK`, `404 Not Found`
+- **Example Response**:
 ```json
-{
-  "dataset_id": "ds_20260725_1002"
-}
-```
-
-**Response `200 OK`**:
-```json
-{
-  "message": "Active dataset updated",
-  "active_dataset_id": "ds_20260725_1002"
-}
-```
-
----
-
-### 2. Executive BI Dashboard
-
-#### `GET /dashboard/kpis`
-Retrieves executive financial metrics calculated from active dataset.
-
-**Query Parameters**:
-- `dataset_id` (optional): Specific dataset ID (defaults to active dataset).
-
-**Response `200 OK`**:
-```json
-{
-  "total_revenue": 4859201.45,
-  "net_profit": 1204910.12,
-  "order_count": 500,
-  "avg_order_value": 9718.40,
-  "profit_margin": 24.79,
-  "active_dataset": "Sales_Q3_2026.csv"
-}
-```
-
----
-
-### 3. Sales Analytics
-
-#### `GET /sales/overview`
-Retrieves multidimensional sales breakdowns.
-
-**Response `200 OK`**:
-```json
-{
-  "by_channel": {
-    "Retail": 1820400.12,
-    "Online": 1948300.50,
-    "Wholesale": 1090500.83
-  },
-  "by_category": {
-    "Technology": 2100450.00,
-    "Furniture": 1540200.30,
-    "Office Supplies": 1218551.15
-  },
-  "top_sales_reps": [
-    { "name": "Eve", "sales": 984500.00 },
-    { "name": "David", "sales": 912000.00 }
-  ]
-}
-```
-
----
-
-### 4. Sales Forecasting
-
-#### `GET /forecast`
-Returns historical sales trajectory alongside future predicted data points with confidence bands.
-
-**Response `200 OK`**:
-```json
-{
-  "horizon_months": 6,
-  "historical": [
-    { "date": "2024-01-01", "sales": 340200.00 },
-    { "date": "2024-02-01", "sales": 389100.00 }
-  ],
-  "forecast": [
-    { "date": "2025-01-01", "predicted_sales": 412000.00, "lower_bound": 385000.00, "upper_bound": 439000.00 },
-    { "date": "2025-02-01", "predicted_sales": 428500.00, "lower_bound": 398000.00, "upper_bound": 459000.00 }
-  ],
-  "accuracy_metrics": {
-    "mae": 14230.12,
-    "rmse": 18940.45,
-    "mape": 4.12
+[
+  {
+    "antecedent": "Phones Model 877",
+    "consequent": "Wireless Charger Pad",
+    "support": 0.15,
+    "confidence": 0.78,
+    "lift": 2.45
   }
-}
+]
 ```
 
 ---
 
-### 5. Product Recommendation Engine
+### 6. Reports & PDF Generation
+#### `GET /api/reports`
+Returns executive metrics and triggers PDF report download.
 
-#### `GET /recommendation`
-Returns cross-selling recommendations derived from Market Basket Analysis.
-
-**Response `200 OK`**:
-```json
-{
-  "recommendations": [
-    {
-      "antecedent": "Phones Model 877",
-      "consequent": "Wireless Charger Pad",
-      "support": 0.15,
-      "confidence": 0.78,
-      "lift": 2.45
-    }
-  ]
-}
-```
+- **Parameters**:
+  - `analysis_id` (Query string, optional)
+- **Status Codes**: `200 OK`, `404 Not Found`
 
 ---
 
-### 6. Customer Churn Prediction
+### 7. Dataset Management & Ingest
+#### `POST /api/datasets/upload`
+Uploads a new sales transaction CSV file.
 
-#### `GET /churn`
-Retrieves customer risk classification metrics.
+- **Payload**: `multipart/form-data` with `file`
+- **Status Codes**: `200 OK`, `400 Bad Request`
 
-**Response `200 OK`**:
-```json
-{
-  "high_risk_customers": 42,
-  "medium_risk_customers": 118,
-  "low_risk_customers": 340,
-  "retention_rate": 87.2,
-  "top_churn_factors": [
-    "High discount sensitivity",
-    "Decreased order frequency (>90 days)"
-  ]
-}
-```
+#### `POST /api/datasets/analyze`
+Triggers full asynchronous execution of the machine learning pipeline.
+
+- **Payload**: `{"dataset_id": "ds_20260725_1001"}`
+- **Status Codes**: `200 OK`, `400 Bad Request`, `500 Server Error`
+
+#### `POST /api/retrain` or `POST /datasets/<id>/retrain`
+Triggers pipeline retraining and increments model version (`v1` → `v2`).
+
+- **Status Codes**: `200 OK`, `500 Server Error`
