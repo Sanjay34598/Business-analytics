@@ -110,10 +110,10 @@
         "name": "test_lifecycle.csv",
         "created_at": "Jul 25, 2026, 09:19 AM",
         "uploadDate": "Jul 25, 2026, 09:19 AM",
-        "status": "Training",
+        "status": "Completed",
         "rows": 5000,
         "columns": 18,
         "model_version": "v1",
-        "accuracy": "N/A"
+        "accuracy": "89.5%"
     }
 ]
