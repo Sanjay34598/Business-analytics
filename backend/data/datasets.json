@@ -97,11 +97,11 @@
         "name": "test_lifecycle.csv",
         "created_at": "Jul 25, 2026, 08:38 AM",
         "uploadDate": "Jul 25, 2026, 08:38 AM",
-        "status": "Training",
+        "status": "Completed",
         "rows": 5000,
         "columns": 18,
         "model_version": "v1",
-        "accuracy": "N/A"
+        "accuracy": "89.5%"
     },
     {
         "analysis_id": "analysis_009",
@@ -110,6 +110,19 @@
         "name": "dataset_a.csv",
         "created_at": "Jul 25, 2026, 08:38 AM",
         "uploadDate": "Jul 25, 2026, 08:38 AM",
+        "status": "Completed",
+        "rows": 100,
+        "columns": 23,
+        "model_version": "v1",
+        "accuracy": "89.5%"
+    },
+    {
+        "analysis_id": "analysis_010",
+        "id": "analysis_010",
+        "dataset_name": "dataset_b.csv",
+        "name": "dataset_b.csv",
+        "created_at": "Jul 25, 2026, 08:41 AM",
+        "uploadDate": "Jul 25, 2026, 08:41 AM",
         "status": "Training",
         "rows": 100,
         "columns": 23,
