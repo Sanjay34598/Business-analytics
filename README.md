@@ -114,7 +114,7 @@ Traditional business intelligence tools often require complex ETL pipelines, spe
 
 Watch the complete application demo here:
 
-**▶️ Demo:** *(Paste your YouTube/Drive/LinkedIn video link here)*
+**▶️ Demo: https://www.linkedin.com/posts/nallasanjay_react-python-flask-ugcPost-7486700616287698946-ei8d/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAFMMpOQBzKu7X-EHJ4j8mqAqysJjzTYvkrY
 
 ---
 
