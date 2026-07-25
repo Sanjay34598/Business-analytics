@@ -1,7 +1,51 @@
+# Python
 __pycache__/
-*.pyc
-.env
-.venv/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
 venv/
-.ipynb_checkpoints/
+ENV/
+env.bak/
+venv.bak/
+
+# Machine Learning Artifacts & Models
+*.pkl
+*.joblib
+*.h5
+*.onnx
+*.pth
+
+# Application Data & Runtime Files
+backend/data/analysis_runs/
+backend/data/uploads/
+analysis_runs/
+uploads/
+reports/
+*.log
+
+# Node & Frontend Build Artifacts
+node_modules/
+frontend/node_modules/
+frontend/build/
+dist/
+build/
+coverage/
+.npm
+.eslintcache
+
+# Environment & Secret Configurations
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE & Editor Configurations
+.idea/
+.vscode/
+*.swp
+*.swo
 .DS_Store
+Thumbs.db
