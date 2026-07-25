@@ -1,7 +1,7 @@
 import os
 
 # Server Socket Configuration
-bind = f"{os.getenv('HOST', '0.0.0.0')}:{os.getenv('PORT', '5000')}"
+bind = f"0.0.0.0:{os.getenv('PORT', '5000')}"
 backlog = 2048
 
 # Worker Processes

@@ -102,5 +102,18 @@
         "columns": 18,
         "model_version": "v1",
         "accuracy": "89.5%"
+    },
+    {
+        "analysis_id": "analysis_009",
+        "id": "analysis_009",
+        "dataset_name": "test_lifecycle.csv",
+        "name": "test_lifecycle.csv",
+        "created_at": "Jul 25, 2026, 09:19 AM",
+        "uploadDate": "Jul 25, 2026, 09:19 AM",
+        "status": "Training",
+        "rows": 5000,
+        "columns": 18,
+        "model_version": "v1",
+        "accuracy": "N/A"
     }
 ]
