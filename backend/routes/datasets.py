@@ -23,6 +23,7 @@ datasets_bp = Blueprint("datasets", __name__)
 logger = logging.getLogger(__name__)
 
 @datasets_bp.route("/datasets", methods=["GET"])
+@datasets_bp.route("/api/datasets", methods=["GET"])
 def list_datasets():
     try:
         datasets = get_datasets()
@@ -31,6 +32,7 @@ def list_datasets():
         return jsonify({"error": str(e)}), 500
 
 @datasets_bp.route("/datasets/upload", methods=["POST"])
+@datasets_bp.route("/api/datasets/upload", methods=["POST"])
 def upload_dataset():
     if "file" not in request.files:
         return jsonify({"error": "No file part"}), 400
@@ -50,6 +52,7 @@ def upload_dataset():
         return jsonify({"error": str(e)}), 500
 
 @datasets_bp.route("/datasets/<dataset_id>/retrain", methods=["POST"])
+@datasets_bp.route("/api/datasets/<dataset_id>/retrain", methods=["POST"])
 def retrain_dataset(dataset_id):
     try:
         # Increment model version for retraining (v1 -> v2 etc.)
@@ -71,6 +74,7 @@ def retrain_dataset(dataset_id):
         return jsonify({"success": False, "reason": str(e), "message": str(e)}), 500
 
 @datasets_bp.route("/datasets/<dataset_id>", methods=["DELETE"])
+@datasets_bp.route("/api/datasets/<dataset_id>", methods=["DELETE"])
 def remove_dataset(dataset_id):
     try:
         invalidate_cache(dataset_id)

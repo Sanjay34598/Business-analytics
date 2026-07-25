@@ -1,4 +1,5 @@
-const API_BASE = (process.env.REACT_APP_API_URL || process.env.REACT_APP_API_BASE_URL || "https://web-production-71f38.up.railway.app").replace(/\/+$/, "");
+const rawApiUrl = process.env.REACT_APP_API_URL || process.env.REACT_APP_API_BASE_URL || "https://web-production-71f38.up.railway.app";
+const API_BASE = rawApiUrl.replace(/\/+$/, "").replace(/\/api\/?$/, "");
 
 export async function getApiData(path) {
   try {

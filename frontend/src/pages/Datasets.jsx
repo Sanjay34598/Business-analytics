@@ -61,7 +61,8 @@ function Datasets() {
   };
 
   const handleDownloadReport = (id) => {
-    const apiBase = (process.env.REACT_APP_API_URL || process.env.REACT_APP_API_BASE_URL || "https://web-production-71f38.up.railway.app").replace(/\/+$/, "");
+    const rawApiUrl = process.env.REACT_APP_API_URL || process.env.REACT_APP_API_BASE_URL || "https://web-production-71f38.up.railway.app";
+    const apiBase = rawApiUrl.replace(/\/+$/, "").replace(/\/api\/?$/, "");
     window.open(`${apiBase}/api/report?analysis_id=${id}`, "_blank");
   };
 
