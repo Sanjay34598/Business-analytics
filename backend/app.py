@@ -35,8 +35,15 @@ from routes.reports import reports_bp
 app = Flask(__name__)
 
 # Configurable CORS origins
-cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:3001").split(",")
-CORS(app, resources={r"/*": {"origins": cors_origins}})
+default_origins = "http://localhost:3000,http://localhost:3001,https://business-analytics-tan.vercel.app"
+cors_origins = os.getenv("CORS_ORIGINS", default_origins).split(",")
+cors_origins = [origin.strip() for origin in cors_origins if origin.strip()]
+CORS(app, resources={r"/*": {
+    "origins": cors_origins,
+    "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"],
+    "supports_credentials": False
+}})
 
 app.register_blueprint(dashboard_bp)
 app.register_blueprint(sales_bp)
@@ -45,6 +52,27 @@ app.register_blueprint(churn_bp)
 app.register_blueprint(recommendation_bp)
 app.register_blueprint(datasets_bp)
 app.register_blueprint(reports_bp)
+
+# Production Request Logging
+from flask import request as flask_request
+
+@app.before_request
+def log_request_info():
+    logger.info(
+        f"REQUEST: {flask_request.method} {flask_request.url} | "
+        f"Origin: {flask_request.headers.get('Origin', 'N/A')} | "
+        f"Host: {flask_request.headers.get('Host', 'N/A')}"
+    )
+
+@app.after_request
+def log_response_info(response):
+    logger.info(
+        f"RESPONSE: {flask_request.method} {flask_request.path} | "
+        f"Status: {response.status_code} | "
+        f"CORS-Origin: {response.headers.get('Access-Control-Allow-Origin', 'NOT SET')}"
+    )
+    return response
+
 
 @app.route("/health", methods=["GET"])
 @app.route("/api/health", methods=["GET"])
