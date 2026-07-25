@@ -4,6 +4,9 @@ import pandas as pd
 from functools import lru_cache
 from services.dataset_manager import get_analysis_dir, get_analysis_metadata
 
+import logging
+logger = logging.getLogger(__name__)
+
 # Custom in-memory dictionary cache with invalidation
 _data_cache = {}
 
@@ -51,7 +54,7 @@ def get_data(analysis_id, data_type):
         _data_cache[cache_key] = records
         return records
     except Exception as e:
-        print(f"Error reading {file_path}: {e}")
+        logger.error(f"Error reading {file_path}: {e}")
         return []
 
 def get_metrics(analysis_id):
@@ -74,7 +77,7 @@ def get_metrics(analysis_id):
             _data_cache[cache_key] = data
             return data
     except Exception as e:
-        print(f"Error reading metrics for {analysis_id}: {e}")
+        logger.error(f"Error reading metrics for {analysis_id}: {e}")
         return {}
 
 def calculate_kpis(sales_data, forecast_data, churn_data, rec_data):

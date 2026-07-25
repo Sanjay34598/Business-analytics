@@ -1,7 +1,9 @@
-// API calls will use relative paths so the React dev server proxy routes them to the backend
+const API_BASE = process.env.REACT_APP_API_URL || process.env.REACT_APP_API_BASE_URL || "";
+
 export async function getApiData(path) {
   try {
-    const response = await fetch(path);
+    const fullPath = path.startsWith("http") ? path : `${API_BASE}${path}`;
+    const response = await fetch(fullPath);
 
     if (!response.ok) {
       throw new Error(`Unable to load data (${response.status}).`);

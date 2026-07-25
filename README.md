@@ -2,10 +2,15 @@
 
 ### Enterprise Machine Learning & Business Intelligence Dashboard
 
+[![React 19](https://img.shields.io/badge/React-19-61dafb.svg?logo=react&logoColor=white)](frontend/package.json)
+[![Flask 3.0](https://img.shields.io/badge/Flask-3.0-000000.svg?logo=flask&logoColor=white)](backend/app.py)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-blue.svg?logo=python&logoColor=white)](requirements.txt)
+[![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.6.1-F7931E.svg?logo=scikit-learn&logoColor=white)](requirements.txt)
+[![Pandas](https://img.shields.io/badge/Pandas-2.2-150458.svg?logo=pandas&logoColor=white)](requirements.txt)
+[![Chart.js](https://img.shields.io/badge/Chart.js-4.5-FF6384.svg?logo=chartdotjs&logoColor=white)](frontend/package.json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-blue.svg)](requirements.txt)
-[![React 19](https://img.shields.io/badge/React-19-61dafb.svg)](frontend/package.json)
-[![Flask 3.0](https://img.shields.io/badge/Flask-3.0-000000.svg)](backend/app.py)
+[![GitHub Stars](https://img.shields.io/github/stars/your-username/Business-analytics.svg?style=flat&logo=github)](https://github.com/your-username/Business-analytics)
+[![GitHub Forks](https://img.shields.io/github/forks/your-username/Business-analytics.svg?style=flat&logo=github)](https://github.com/your-username/Business-analytics)
 [![Code Style: PEP8](https://img.shields.io/badge/code%20style-pep8-green.svg)](CONTRIBUTING.md)
 
 An end-to-end enterprise web application combining interactive business intelligence dashboards, real-time dataset management, and an automated machine learning pipeline for sales forecasting, RFM customer segmentation, predictive churn scoring, and product cross-selling recommendation engines.

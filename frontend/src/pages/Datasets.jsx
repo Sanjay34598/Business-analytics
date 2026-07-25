@@ -61,7 +61,8 @@ function Datasets() {
   };
 
   const handleDownloadReport = (id) => {
-    window.open(`http://localhost:5000/api/report?analysis_id=${id}`, "_blank");
+    const apiBase = process.env.REACT_APP_API_URL || process.env.REACT_APP_API_BASE_URL || "";
+    window.open(`${apiBase}/api/report?analysis_id=${id}`, "_blank");
   };
 
   return (
