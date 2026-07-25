@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { getApiData } from "../services/api";
 
+const API_BASE = process.env.REACT_APP_API_URL || "";
+
 const DatasetContext = createContext();
 
 export const DatasetProvider = ({ children }) => {
@@ -45,7 +47,7 @@ export const DatasetProvider = ({ children }) => {
     const formData = new FormData();
     formData.append("file", file);
 
-    const res = await fetch("/datasets/upload", {
+    const res = await fetch(`${API_BASE}/datasets/upload`, {
       method: "POST",
       body: formData,
     });
@@ -68,7 +70,7 @@ export const DatasetProvider = ({ children }) => {
   };
 
   const deleteDataset = async (id) => {
-    const res = await fetch(`/datasets/${id}`, {
+    const res = await fetch(`${API_BASE}/datasets/${id}`, {
       method: "DELETE",
     });
     
@@ -84,7 +86,7 @@ export const DatasetProvider = ({ children }) => {
     // Optimistically update status to Training
     setDatasets(prev => prev.map(d => d.id === id ? { ...d, status: "Training" } : d));
     
-    const res = await fetch("/datasets/analyze", {
+    const res = await fetch(`${API_BASE}/datasets/analyze`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
